@@ -1,0 +1,232 @@
+{% extends 'venta_tienda/base.html' %}
+
+{% block title %}Menú Principal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header con información del usuario -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">
+                                <i class="fas fa-store"></i> Sistema de Ventas
+                            </h2>
+                            <p class="mb-0">
+                                <i class="fas fa-building"></i> {{ tienda.nombre }}
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <p class="mb-1">
+                                <i class="fas fa-user"></i> {{ usuario_tienda.nombre_completo }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar"></i> {{ "now"|date:"d/m/Y H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menú principal con 3 opciones -->
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card card-menu h-100 shadow-sm" onclick="window.location.href='{% url 'venta_tienda:venta' %}'">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-cash-register display-1 text-success"></i>
+                    </div>
+                    <h3 class="card-title text-success">Venta Fel</h3>
+                    <p class="card-text text-muted">Registrar nueva venta de productos y recetas</p>
+                    <div class="mt-3">
+                        <span class="badge bg-success">Activo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card card-menu h-100 shadow-sm" onclick="window.location.href='{% url 'venta_tienda:caja' %}'">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-cash-register display-1 text-warning"></i>
+                    </div>
+                    <h3 class="card-title text-warning">Caja</h3>
+                    <p class="card-text text-muted">Registrar dinero inicial del día</p>
+                    <div class="mt-3">
+                        <span class="badge bg-warning text-dark">Diario</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card card-menu h-100 shadow-sm" onclick="window.location.href='{% url 'venta_tienda:reimpresion' %}'">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-print display-1 text-info"></i>
+                    </div>
+                    <h3 class="card-title text-info">Reimpresión</h3>
+                    <p class="card-text text-muted">Consultar y reimprimir recibos anteriores</p>
+                    <div class="mt-3">
+                        <span class="badge bg-info">Historial</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-4 mb-4">
+    <div class="card card-menu h-100 shadow-sm" onclick="window.location.href='{% url 'venta_tienda:inventario' %}'">
+        <div class="card-body text-center p-4">
+            <div class="mb-3">
+                <i class="fas fa-boxes display-1 text-purple"></i>
+            </div>
+            <h3 class="card-title text-purple">Proforma</h3>
+            <p class="card-text text-muted">Ajuste y control de inventario interno</p>
+            <div class="mt-3">
+                <span class="badge bg-purple">Ajuste</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-3 col-md-4 mb-4">
+    <div class="card card-menu h-100 shadow-sm" onclick="window.location.href='{% url 'venta_tienda:consulta_movimientos' %}'">
+        <div class="card-body text-center p-4">
+            <div class="mb-3">
+                <i class="fas fa-clipboard-list display-1 text-dark"></i>
+            </div>
+            <h3 class="card-title text-dark">Consulta</h3>
+            <p class="card-text text-muted">Ver todos los movimientos y detalles</p>
+            <div class="mt-3">
+                <span class="badge bg-dark">Consulta</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-3 col-md-4 mb-4">
+    <div class="card card-menu h-100 shadow-sm" onclick="window.location.href='{% url 'venta_tienda:crear_control_diario' %}'">
+        <div class="card-body text-center p-4">
+            
+            <div class="mb-3">
+                <i class="fas fa-money-bill-wave display-1" style="color:#8B4513;"></i>
+            </div>
+
+            <h3 class="card-title" style="color:#8B4513;">Control Diario</h3>
+
+            <p class="card-text text-muted">Registro del Control Diario</p>
+
+            <div class="mt-3">
+                <span class="badge" style="background-color:#8B4513; color:white;">
+                    Diario
+                </span>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="col-lg-3 col-md-4 mb-4">
+    <div class="card card-menu h-100 shadow-sm" onclick="window.location.href='{% url 'venta_tienda:cierre_diario' %}'">
+        <div class="card-body text-center p-4">
+            <div class="mb-3">
+                <i class="fas fa-cash-register display-1 text-danger"></i>
+            </div>
+            <h3 class="card-title text-danger">Cierre Diario</h3>
+            <p class="card-text text-muted">Registro del día</p>
+            <div class="mt-3">
+                <span class="badge bg-danger text-white">Diario</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <!-- Botón de logout -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button id="btn-logout" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Color púrpura personalizado */
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+</style>
+
+<script>
+// Agregar efectos de hover mejorados
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card-menu');
+
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px)';
+            this.style.boxShadow = '0 15px 30px rgba(0,0,0,0.2)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+        });
+    });
+});
+</script>
+<script>
+$(document).ready(function() {
+    // Botón cerrar sesión con SweetAlert
+    $('#btn-logout').click(function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: '¿Cerrar Sesión?',
+            text: '¿Está seguro de que desea cerrar sesión?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, cerrar sesión',
+            cancelButtonText: 'Cancelar',
+            customClass: {
+                confirmButton: 'btn btn-danger',
+                cancelButton: 'btn btn-secondary'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar mensaje de despedida
+                Swal.fire({
+                    title: '¡Hasta luego!',
+                    text: 'Cerrando sesión...',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then(() => {
+                    // Redirigir al logout
+                    window.location.href = '{% url "Salir" %}';
+                });
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,44 @@
+<table class="table table-sm table-striped">
+    <thead class="table-primary">
+        <tr>
+            <th>#</th>
+            <th>Tipo</th>
+            <th>Item</th>
+            <th>Cantidad</th>
+            <th>Precio Unit.</th>
+            <th>Subtotal</th>
+            <th>Stock Actual</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in detalles %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <span class="badge {% if d.producto %}bg-primary{% else %}bg-success{% endif %}">
+                        {% if d.producto %}Producto{% else %}Receta{% endif %}
+                    </span>
+                </td>
+                <td>{% if d.producto %}{{ d.producto.nombre }}{% else %}{{ d.receta.nombre }}{% endif %}</td>
+                <td>{{ d.cantidad }}</td>
+                <td>Q.{{ d.precio_unitario|floatformat:2 }}</td>
+                <td>Q.{{ d.subtotal|floatformat:2 }}</td>
+                <td>
+                    {% if d.producto %}
+                        {{ d.producto.stock }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="7" class="text-center">Sin detalles</td></tr>
+        {% endfor %}
+    </tbody>
+    <tfoot class="table-light">
+        <tr>
+            <td colspan="5" class="text-end"><strong>Total Venta:</strong></td>
+            <td colspan="2"><strong>Q.{{ venta.total|floatformat:2 }}</strong></td>
+        </tr>
+    </tfoot>
+</table>

@@ -1,0 +1,46 @@
+{% extends 'Base/base.html' %}
+{% block content %}
+
+<div class="container" style="margin-top: 25px;">
+    <a href="{% url 'ListaProducto' %}" class="btn btn-warning">Listado General</a><br>
+    <br><h4>LISTADO DE PRODUCTOS</h4><br>
+
+    <h4>Productos de la tienda: {{ tienda.nombre }}</h4><br>
+
+<div class="table-responsive">
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <td>Producto</td>
+        <td>Unidad Medida</td>
+        <td>Inicio</td>
+        <td>Ingreso</td>
+        <td>Salida</td>
+        <td>Final Dia Anterior</td>
+        <td>Acciones</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in productos %}
+        <tr>
+          <td>{{ p.nombre }}</td>
+          <td>{{ p.medida }}</td>
+          <td>{{ p.inicio }}</td>
+          <td>{{ p.ingreso }}</td>
+          <td>{{ p.salida }}</td>
+          <td>{{ p.final }}</td>
+          <td>
+            <a href="{% url 'UpdateProducto' p.id %}">Actualizar</a>
+            <a href="{% url 'DeleteProducto' p.id %}" style="color: red;">Eliminar</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7">No hay productos disponibles para esta tienda.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">ACTUALIZAR PRODUCTO</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.nombre }}
+                            <label>Nombre del Producto</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.medida }}
+                            <label>Unidad de Medida</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.precio_compra }}
+                            <label>Precio de Compra</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.precio_venta }}
+                            <label>Precio de Venta</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.tienda }}
+                            <label>Tienda</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.id_cate }}
+                            <label>Categoría</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            {{ form.estado }}
+                            <label class="form-check-label">
+                                Producto Activo
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="{{ form.imagen.id_for_label }}" class="form-label">{{ form.imagen.label }}</label>
+                        {{ form.imagen }}
+                        {% if form.instance.imagen %}
+                            <div class="mt-2">
+                                <small class="text-muted">Imagen actual:</small>
+                                <img src="{{ form.instance.imagen.url }}" alt="Imagen actual" style="max-width: 100px; max-height: 100px;" class="d-block mt-1">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-3">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" value="{% now 'd-m-Y' %}" readonly>
+                            <label>Fecha Modificación</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                            <label>Usuario</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                    </button>
+                    <a href="{% url 'ListaProducto' %}" class="btn btn-danger">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        "title": "Información",
+        "text": "{{message}}",
+        "icon": "{{message.tags}}"
+    });
+</script>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

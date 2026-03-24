@@ -1,0 +1,199 @@
+{% extends 'venta_tienda/base.html' %}
+
+{% block title %}Detalle de Venta{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-receipt"></i> Detalle de Venta</h1>
+                <div>
+                    <a href="{% url 'venta_tienda:reimpresion' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                    <button class="btn btn-primary" onclick="imprimirRecibo()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Información de la venta -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Información de la Venta
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Número de Recibo:</strong> {{ bitacora.numero_recibo }}</p>
+                            <p><strong>Fecha:</strong> {{ bitacora.fecha|date:"d/m/Y" }}</p>
+                            <p><strong>Empleado:</strong> {{ bitacora.usuario_tienda.nombre_completo }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Tienda:</strong> {{ bitacora.tienda.nombre }}</p>
+                            <p><strong>Total:</strong> <span class="text-success h5">Q{{ bitacora.total|floatformat:2 }}</span></p>
+                            <p><strong>Estado:</strong> 
+                                {% if bitacora.estado == 1 %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Anulado</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% if bitacora.observaciones %}
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong>Observaciones:</strong></p>
+                            <p class="text-muted">{{ bitacora.observaciones }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Detalles de productos -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Productos/Recetas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Producto/Receta</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Precio Unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detalle in detalles %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ detalle.nombre_item }}</strong>
+                                        {% if detalle.producto %}
+                                            <small class="text-muted d-block">Producto</small>
+                                        {% else %}
+                                            <small class="text-muted d-block">Receta</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">{{ detalle.cantidad }}</td>
+                                    <td class="text-end">Q{{ detalle.precio_unitario|floatformat:2 }}</td>
+                                    <td class="text-end"><strong>Q{{ detalle.subtotal|floatformat:2 }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active">
+                                    <th colspan="3" class="text-end">TOTAL:</th>
+                                    <th class="text-end h5 text-success">Q{{ bitacora.total|floatformat:2 }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Vista previa del recibo -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-eye"></i> Vista Previa del Recibo
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="reciboPreview" style="font-family: monospace; font-size: 11px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                        <div class="text-center mb-2">
+                            <strong>{{ bitacora.tienda.nombre }}</strong><br>
+                            <small>Sistema de Ventas</small>
+                        </div>
+                        <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                        
+                        <div>
+                            <strong>Recibo:</strong> {{ bitacora.numero_recibo }}<br>
+                            <strong>Fecha:</strong> {{ bitacora.fecha|date:"d/m/Y" }}<br>
+                            <strong>Empleado:</strong> {{ bitacora.usuario_tienda.nombre_completo }}
+                        </div>
+                        
+                        <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                        
+                        {% for detalle in detalles %}
+                        <div style="margin-bottom: 5px;">
+                            <div><strong>{{ detalle.nombre_item }}</strong></div>
+                            <div>{{ detalle.cantidad }} x Q{{ detalle.precio_unitario|floatformat:2 }} = Q{{ detalle.subtotal|floatformat:2 }}</div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                        
+                        <div class="text-end">
+                            <strong>TOTAL: Q{{ bitacora.total|floatformat:2 }}</strong>
+                        </div>
+                        
+                        {% if bitacora.observaciones %}
+                        <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                        <div>
+                            <small><strong>Obs:</strong> {{ bitacora.observaciones }}</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                        <div class="text-center">
+                            <small>¡Gracias por su compra!</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function imprimirRecibo() {
+    const reciboContent = document.getElementById('reciboPreview').innerHTML;
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Recibo - {{ bitacora.numero_recibo }}</title>
+            <style>
+                body {
+                    font-family: monospace;
+                    font-size: 12px;
+                    margin: 0;
+                    padding: 10px;
+                    width: 80mm;
+                }
+                @media print {
+                    body { margin: 0; padding: 5px; }
+                }
+            </style>
+        </head>
+        <body>
+            ${reciboContent}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+}
+</script>
+{% endblock %}

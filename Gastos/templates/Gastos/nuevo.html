@@ -1,0 +1,72 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<script>
+  Swal.fire({
+    title: "Informacion Sistema",
+    text: "{{ message }}",
+    icon: "{{ message.tags }}"
+  })
+</script>
+{% endfor %}
+{% endif %}
+
+<div class="container mt-4">
+  <h3 class="mb-4">Formulario de Gastos</h3>
+  <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label>{{ form.nombre.label_tag }}</label>
+        {{ form.nombre }}
+      </div>
+      <div class="col-md-4">
+        <label>{{ form.descripcion.label_tag }}</label>
+        {{ form.descripcion }}
+      </div>
+      <div class="col-md-4">
+        <label>{{ form.factura.label_tag }}</label>
+        {{ form.factura }}
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label>{{ form.fecha.label_tag }}</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+          {{ form.fecha }}
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.cantidad.label_tag }}</label>
+        <div class="input-group">
+          <span class="input-group-text">#</span>
+          {{ form.cantidad }}
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.precio.label_tag }}</label>
+        <div class="input-group">
+          <span class="input-group-text">Q</span>
+          {{ form.precio }}
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label>{{ form.tienda.label_tag }}</label>
+        {{ form.tienda }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{% url 'Admin' %}" class="btn btn-danger">Cancelar</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="margin-top: 75px;">
+  <h4>LISTADO DE PRODUCTOS</h4><br>
+  <form method="get" id="tiendaForm" action="{% url 'ListaProducto' %}">
+    <div class="row">
+      <div class="col-md-6">
+        <label for="tienda">Selecciona una tienda:</label>
+        <select class="form-control" name="tienda" id="tienda" onchange="this.form.submit()">
+          <option value="">-- Todas las tiendas --</option>
+          {% for tienda in tiendas %}
+            <option value="{{ tienda.id }}" {% if tienda.id|stringformat:"s" == tienda_seleccionada|stringformat:"s" %}selected{% endif %}>
+              {{ tienda.nombre }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6 d-flex align-items-end">
+        <a href="{% url 'ListaProducto' %}" class="btn btn-secondary ml-2">Ver Todos</a>
+        <a href="{% url 'ProductosBaja' %}" class="btn btn-warning ml-2">Ver Dados de Baja</a>
+      </div>
+    </div>
+  </form>
+  <br>
+  <div class="table-responsive">
+    <input class="form-control col-md-3 light-table-filter" data-table="order-table" type="text"
+           placeholder="Buscar.." style="border: 1px solid black;" name="buscar" autofocus="buscar"><br>
+    <table class="table table-bordered table-hover order-table">
+      <thead>
+        <tr>
+          <td>Producto</td>
+          <td>Unidad Medida</td>
+          <td>Stock</td>
+          <td>Precio Compra</td>
+          <td>Precio Venta</td>
+          <td>Tienda</td>
+          <td>Acciones</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in productos %}
+          <tr>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.medida }}</td>
+            <td>{{ p.stock }}</td>
+            <td>{{ p.precio_compra }}</td>
+            <td>{{ p.precio_venta }}</td>
+            <td>{{ p.tienda.nombre }}</td>
+            <td>
+              <a href="{% url 'UpdateProducto' p.id %}">Actualizar</a> |
+              <a href="{% url 'IngresoProducto' p.id %}">Ingreso</a> |
+              <a href="{% url 'CambiarEstadoProducto' p.id %}" style="color: orange;">Dar de Baja</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">SIN PRODUCTOS</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

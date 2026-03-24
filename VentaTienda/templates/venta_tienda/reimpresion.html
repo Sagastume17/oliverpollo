@@ -1,0 +1,186 @@
+{% extends 'venta_tienda/base.html' %}
+
+{% block title %}Reimpresión de Recibos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-print"></i> Reimpresión de Recibos</h1>
+                <a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Menú
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt"></i> Últimas Ventas FEL - {{ tienda.nombre }}
+                    </h5>
+                    <small class="text-muted">Solo se muestran ventas con factura que pueden reimprimirse</small>
+                </div>
+                
+                <div class="card-body">
+                    {% if bitacoras %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Recibo</th>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Empleado</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                        <th>Factura</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bitacora in bitacoras %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ bitacora.numero_recibo }}</strong>
+                                        </td>
+                                        <td>
+                                            <small>{{ bitacora.fecha|date:"d/m/Y" }}</small><br>
+                                            <small class="text-muted">{{ bitacora.fecha }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">FEL</span>
+                                        </td>
+                                        <td>{{ bitacora.usuario_tienda.nombre_completo }}</td>
+                                        <td>
+                                            <strong class="text-success">Q{{ bitacora.total|floatformat:2 }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if bitacora.estado == 1 %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Anulado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                        
+                                                   <a href="{{ bitacora.link }}" 
+                                                   class="btn btn-sm badge bg-danger" target="_blank" title="Ver Factura">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
+                                                </td>
+                                                 <td>
+                                                    <div class="btn-group" role="group">
+                                                <a href="{% url 'venta_tienda:detalle_bitacora' bitacora.id %}" 
+                                                   class="btn btn-sm btn-outline-info" title="Ver Detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if bitacora.estado == 1 %}
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        onclick="imprimirRecibo('{{ bitacora.numero_recibo }}')" title="Reimprimir">
+                                                    <i class="fas fa-print"></i>
+                                                </button>
+                                             
+                                                {% if bitacora.estado == 1 %}
+                                                <a href="{% url 'venta_tienda:AnularFel' bitacora.id %}" 
+                                                   class="btn btn-sm btn-outline-danger" title="Anular Factura">
+                                                    <i class="fas fa-close"></i>
+                                                    {% else %}
+                                                   
+                                                    {% endif %}
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-receipt display-1 text-muted"></i>
+                            <h4 class="text-muted mt-3">No hay ventas FEL registradas</h4>
+                            <p class="text-muted">Solo las ventas con factura (FEL) pueden reimprimirse. Los ajustes de inventario no generan PDF.</p>
+                            <div class="mt-3">
+                                <a href="{% url 'venta_tienda:venta' %}" class="btn btn-success me-2">
+                                    <i class="fas fa-receipt"></i> Registrar Venta FEL
+                                </a>
+                                <a href="{% url 'venta_tienda:inventario' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-boxes"></i> Ajuste de Inventario
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar recibo -->
+<div class="modal fade" id="reciboModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt"></i> Recibo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="reciboContent">
+                <!-- Contenido del recibo se cargará aquí -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function imprimirRecibo(numeroRecibo) {
+    // Abrir PDF directamente en nueva ventana
+    window.open(`/venta-tienda/pdf-recibo/${numeroRecibo}/`, '_blank');
+
+    // Mostrar mensaje de confirmación
+    Swal.fire({
+        icon: 'success',
+        title: 'PDF Generado',
+        text: 'El recibo se abrirá en una nueva ventana',
+        timer: 2000,
+        showConfirmButton: false
+    });
+}
+
+// Función para buscar recibos (se puede implementar más adelante)
+function buscarRecibo() {
+    const numeroRecibo = document.getElementById('buscarRecibo').value;
+    if (numeroRecibo.trim()) {
+        // Implementar búsqueda
+        console.log('Buscando recibo:', numeroRecibo);
+    }
+}
+</script>
+
+<style>
+@media print {
+    .modal-header, .modal-footer {
+        display: none !important;
+    }
+    .modal-body {
+        padding: 0 !important;
+    }
+    .receipt-content {
+        width: 80mm !important;
+        font-size: 10px !important;
+    }
+}
+</style>
+{% endblock %}

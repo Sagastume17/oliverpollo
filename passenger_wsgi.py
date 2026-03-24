@@ -1,0 +1,1 @@
+from frituras.wsgi import application

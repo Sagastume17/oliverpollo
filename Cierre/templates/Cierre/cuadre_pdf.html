@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cuadre de Caja - {{ cuadre.tienda.nombre }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .tienda-info {
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #444;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .field {
+            margin-bottom: 10px;
+        }
+        .field-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .field-value {
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Cuadre de Caja</h1>
+        <div class="tienda-info">
+            <h2>{{ cuadre.tienda.nombre }}</h2>
+            <p>Fecha: {{ cuadre.fecha }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Fechas de Control</h2>
+        <div class="grid">
+            <div class="field">
+                <div class="field-label">Fecha de Inicio Empanizado</div>
+                <div class="field-value">{{ cuadre.fecha_empanizado|default:"No registrado" }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Fecha Gas</div>
+                <div class="field-value">{{ cuadre.fecha_gas|default:"No registrado" }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Fecha Cambio de Aceite</div>
+                <div class="field-value">{{ cuadre.fecha_cambio_aceite|default:"No registrado" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Totales</h2>
+        <table>
+            <tr>
+                <th>Concepto</th>
+                <th>Monto</th>
+            </tr>
+            <tr>
+                <td>Total de Venta</td>
+                <td>Q{{ cuadre.venta_total }}</td>
+            </tr>
+            <tr>
+                <td>Gasto Diario</td>
+                <td>Q{{ cuadre.gasto_diario }}</td>
+            </tr>
+            <tr>
+                <td>Efectivo en Caja</td>
+                <td>Q{{ cuadre.efectivo_caja }}</td>
+            </tr>
+            <tr>
+                <td>Total a Depositar</td>
+                <td>Q{{ cuadre.total_depositar }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Informaciion de Deposito</h2>
+        <div class="field">
+            <div class="field-label">No. de Boleta</div>
+            <div class="field-value">{{ cuadre.numero_boleta|default:"No registrado" }}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Informacion de Pollo Rey</h2>
+        <div class="grid">
+            <div class="field">
+                <div class="field-label">Total de Pollo Rey</div>
+                <div class="field-value">Q{{ cuadre.total_pollo_rey }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">No. Factura de Pollo Rey</div>
+                <div class="field-value">{{ cuadre.numero_factura_pollo|default:"No registrado" }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Libras de Pollo</div>
+                <div class="field-value">{{ cuadre.libras_pollo }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if cuadre.otros %}
+    <div class="section">
+        <h2>Otros</h2>
+        <div class="field full-width">
+            <div class="field-value">{{ cuadre.otros|linebreaks }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Generado por: {{ cuadre.usuario.get_full_name }}</p>
+        <p>Fecha de generacion: {{ fecha }}</p>
+    </div>
+</body>
+</html>

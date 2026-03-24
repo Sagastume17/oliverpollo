@@ -1,0 +1,237 @@
+{% extends 'Base/base.html' %}
+
+{% block title %}Bitácora de Ventas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-clipboard-list"></i> Bitácora de Ventas</h1>
+                <div>
+                    <a href="{% url 'admin_empleados:reporte_web' %}" class="btn btn-primary me-2">
+                        <i class="fas fa-chart-bar"></i> Reporte
+                    </a>
+                    <a href="{% url 'admin_empleados:lista' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a Empleados
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ estadisticas.total_bitacoras }}</h4>
+                            <p class="mb-0">Total Registros</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-list fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ estadisticas.total_fel }}</h4>
+                            <p class="mb-0">Ventas FEL</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-receipt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ estadisticas.total_inventario }}</h4>
+                            <p class="mb-0">Inventario</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-boxes fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>Q{{ estadisticas.suma_total|floatformat:2 }}</h4>
+                            <p class="mb-0">Total Ventas</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label">Tienda</label>
+                    <select name="tienda" class="form-select">
+                        <option value="">Todas</option>
+                        {% for tienda in tiendas %}
+                            <option value="{{ tienda.id }}" {% if filtros.tienda_id == tienda.id|stringformat:"s" %}selected{% endif %}>
+                                {{ tienda.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tipo</label>
+                    <select name="tipo" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="FEL" {% if filtros.tipo == "FEL" %}selected{% endif %}>FEL</option>
+                        <option value="inventario" {% if filtros.tipo == "inventario" %}selected{% endif %}>Inventario</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Empleado</label>
+                    <select name="empleado" class="form-select">
+                        <option value="">Todos</option>
+                        {% for empleado in empleados %}
+                            <option value="{{ empleado.id }}" {% if filtros.empleado_id == empleado.id|stringformat:"s" %}selected{% endif %}>
+                                {{ empleado.nombre_completo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Desde</label>
+                    <input type="date" name="fecha_desde" class="form-control" value="{{ filtros.fecha_desde }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" name="fecha_hasta" class="form-control" value="{{ filtros.fecha_hasta }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+                    <a href="{% url 'admin_empleados:bitacora_lista' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de bitácoras -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Registros de Bitácora</h5>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Tienda</th>
+                                <th>Empleado</th>
+                                <th>Tipo</th>
+                                <th>Total</th>
+                                <th>Recibo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bitacora in page_obj %}
+                                <tr>
+                                    <td>{{ bitacora.id }}</td>
+                                    <td>{{ bitacora.fecha|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ bitacora.tienda.nombre }}</td>
+                                    <td>{{ bitacora.usuario_tienda.nombre_completo }}</td>
+                                    <td>
+                                        {% if bitacora.tipo == 'FEL' %}
+                                            <span class="badge bg-success">FEL</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Inventario</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>Q{{ bitacora.total|floatformat:2 }}</td>
+                                    <td>{{ bitacora.numero_recibo }}</td>
+                                    <td>
+                                        <a href="{% url 'admin_empleados:bitacora_detalle' bitacora.id %}" 
+                                           class="btn btn-sm btn-info" title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if bitacora.tipo == 'FEL' %}
+                                            <a href="{% url 'venta_tienda:pdf_recibo' bitacora.numero_recibo %}" 
+                                               class="btn btn-sm btn-secondary" title="Ver PDF" target="_blank">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Paginación">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Primera</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Anterior</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Siguiente</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Última</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay registros que mostrar</h5>
+                    <p class="text-muted">Ajusta los filtros para ver más resultados</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

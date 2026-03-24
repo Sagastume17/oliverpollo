@@ -1,0 +1,157 @@
+{% extends 'venta_tienda/base.html' %}
+
+{% block title %}Gestión de Caja{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-cash-register"></i> Gestión de Caja</h1>
+                <a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Menú
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-day"></i> Caja del día: {{ fecha|date:"d/m/Y" }}
+                    </h5>
+                    <small class="text-muted">{{ tienda.nombre }}</small>
+                </div>
+                
+                <div class="card-body">
+                    {% if caja_hoy %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            La caja del día ya ha sido registrada. No se puede modificar.
+                        </div>
+                    {% endif %}
+
+                    {% if not caja_hoy %}
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.dinero_inicial.id_for_label }}" class="form-label">
+                                    <i class="fas fa-money-bill-wave"></i> {{ form.dinero_inicial.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Q</span>
+                                    {{ form.dinero_inicial }}
+                                </div>
+                                {% if form.dinero_inicial.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.dinero_inicial.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i> Empleado
+                                </label>
+                                <input type="text" class="form-control" value="{{ usuario_tienda.nombre_completo }}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                    <i class="fas fa-sticky-note"></i> {{ form.observaciones.label }}
+                                </label>
+                                {{ form.observaciones }}
+                                {% if form.observaciones.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.observaciones.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Registrar Caja
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if caja_hoy %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history"></i> Información del Registro
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Fecha de registro:</strong> {{ caja_hoy.fecha_registro|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Empleado:</strong> {{ caja_hoy.usuario_tienda.nombre_completo }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Dinero inicial:</strong> Q{{ caja_hoy.dinero_inicial|floatformat:2 }}</p>
+                            <p><strong>Tienda:</strong> {{ caja_hoy.tienda.nombre }}</p>
+                        </div>
+                    </div>
+                    {% if caja_hoy.observaciones %}
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong>Observaciones:</strong></p>
+                            <p class="text-muted">{{ caja_hoy.observaciones }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Formatear el campo de dinero inicial
+    const dineroField = document.getElementById('{{ form.dinero_inicial.id_for_label }}');
+    
+    dineroField.addEventListener('input', function() {
+        // Solo permitir números y punto decimal
+        this.value = this.value.replace(/[^0-9.]/g, '');
+        
+        // Evitar múltiples puntos decimales
+        const parts = this.value.split('.');
+        if (parts.length > 2) {
+            this.value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        // Limitar a 2 decimales
+        if (parts[1] && parts[1].length > 2) {
+            this.value = parts[0] + '.' + parts[1].substring(0, 2);
+        }
+    });
+    
+    // Enfocar el campo de dinero inicial al cargar
+    dineroField.focus();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+<script>
+  Swal.fire({
+    "title": "Informacion Sistema",
+    "text": "{{message}}",
+    "icon": "{{message.tags}}"
+  })
+</script>
+{% endfor %}
+{% endif %}
+
+
+<div class="container">
+  <h3>FORMULARIO DE ACTUALIZACION TIENDA</h3>
+  <form action="#" method="POST" enctype="multipart/form-data">{% csrf_token %}
+
+  <div class="row">
+
+    <div class="col-md-4">
+      <label>{{form.nombre.label_tag}}</label>
+      {{form.nombre}}
+    </div>
+    <div class="col-md-4">
+      <label>{{form.estado.label_tag}}</label>
+      {{form.estado}}
+    </div>
+
+  </div><br>
+
+  <div class="row">
+
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-success">Guardar</button>
+      <a href="{% url 'Admin' %}" class="btn btn-danger">Cancelar</a>
+    </div>
+
+  </div><br>
+
+</div>
+</form>
+
+
+
+{% endblock %}

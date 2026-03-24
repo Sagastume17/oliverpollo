@@ -1,0 +1,304 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Nueva Venta</h3>
+            <span class="badge bg-light text-primary" id="fecha-actual"></span>
+        </div>
+        <div class="card-body">
+            <form id="ventaForm" method="POST">
+                {% csrf_token %}
+            <br>    
+                <!-- Selección de Tienda -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.tienda }}
+                            <label>Seleccionar Tienda</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.fecha }}
+                            <label>Fecha de Venta</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Productos/Recetas Disponibles -->
+                <div class="card mb-4" id="panelItems" style="display: none;">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Productos y Recetas Disponibles</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="tablaProductos">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Stock</th>
+                                        <th>Cantidad</th>
+                                        <th>Agregar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Aquí se llenan los productos/recetas vía JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Items de la Venta -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Items de la Venta</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="tablaItems">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Nombre</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Subtotal</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                                        <td><strong>Q.<span id="totalVenta">0.00</span></strong></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observaciones y Botones -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.observaciones }}
+                            <label>Observaciones</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button type="submit" class="btn btn-primary" id="guardarVenta" disabled>
+                            <i class="fas fa-save"></i> Finalizar Venta
+                        </button>
+                        <a href="{% url 'ListadoVentas' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let items = [];
+let total = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar fecha actual
+    const fechaActual = new Date().toLocaleDateString('es-GT');
+    document.getElementById('fecha-actual').textContent = fechaActual;
+
+    // Evento cambio de tienda
+    document.getElementById('tienda_select').addEventListener('change', function() {
+        if (this.value) {
+            document.getElementById('panelItems').style.display = 'block';
+            cargarItems();
+        } else {
+            document.getElementById('panelItems').style.display = 'none';
+        }
+    });
+
+    // Submit del formulario
+    document.getElementById('ventaForm').addEventListener('submit', guardarVenta);
+});
+
+function cargarItems() {
+    const tiendaId = document.getElementById('tienda_select').value;
+
+    fetch(`/venta/get-items-tienda/?tienda_id=${tiendaId}`)
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('#tablaProductos tbody');
+            tbody.innerHTML = '';
+            
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="badge ${item.tipo === 'producto' ? 'bg-primary' : 'bg-success'}">${item.tipo.toUpperCase()}</span></td>
+                    <td>${item.nombre}</td>
+                    <td>Q.${item.precio.toFixed(2)}</td>
+                    <td>${item.tipo === 'producto' ? item.stock : '-'}</td>
+                    <td>
+                        <input type="number" class="form-control cantidad-input" min="1" 
+                               max="${item.tipo === 'producto' ? item.stock : 9999}" 
+                               value="1" style="width: 80px;">
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-sm agregar-btn">
+                            <i class="fas fa-plus"></i> Agregar
+                        </button>
+                    </td>
+                `;
+                
+                // Guardar datos del item en el tr
+                tr.dataset.id = item.id;
+                tr.dataset.tipo = item.tipo;
+                tr.dataset.nombre = item.nombre;
+                tr.dataset.precio = item.precio;
+                tr.dataset.stock = item.stock;
+                
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'No se pudieron cargar los items', 'error');
+        });
+}
+
+// Evento para agregar items desde la tabla de productos
+document.querySelector('#tablaProductos').addEventListener('click', function(e) {
+    if (e.target.closest('.agregar-btn')) {
+        const tr = e.target.closest('tr');
+        const cantidadInput = tr.querySelector('.cantidad-input');
+        const cantidad = parseInt(cantidadInput.value);
+        const stock = parseInt(tr.dataset.stock);
+
+        if (!cantidad || cantidad < 1) {
+            Swal.fire('Error', 'Ingrese una cantidad válida', 'error');
+            return;
+        }
+
+        if (tr.dataset.tipo === 'producto' && cantidad > stock) {
+            Swal.fire('Error', 'Stock insuficiente', 'error');
+            return;
+        }
+
+        const item = {
+            id: tr.dataset.id,
+            tipo: tr.dataset.tipo,
+            nombre: tr.dataset.nombre,
+            cantidad: cantidad,
+            precio: parseFloat(tr.dataset.precio),
+            subtotal: cantidad * parseFloat(tr.dataset.precio)
+        };
+
+        // Verificar si el item ya existe
+        const itemExistente = items.find(i => i.id === item.id && i.tipo === item.tipo);
+        if (itemExistente) {
+            Swal.fire('Error', 'Este item ya está en la venta', 'error');
+            return;
+        }
+
+        agregarFilaTabla(item);
+        actualizarTotal();
+        
+        // Resetear la cantidad a 1
+        cantidadInput.value = 1;
+    }
+});
+
+function agregarFilaTabla(item) {
+    const tbody = document.querySelector('#tablaItems tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><span class="badge ${item.tipo === 'producto' ? 'bg-primary' : 'bg-success'}">${item.tipo.toUpperCase()}</span></td>
+        <td>${item.nombre}</td>
+        <td>${item.cantidad}</td>
+        <td>Q.${item.precio.toFixed(2)}</td>
+        <td>Q.${item.subtotal.toFixed(2)}</td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    items.push(item);
+    document.getElementById('guardarVenta').disabled = false;
+}
+
+function eliminarItem(btn) {
+    const tr = btn.closest('tr');
+    const index = Array.from(tr.parentNode.children).indexOf(tr);
+    items.splice(index, 1);
+    tr.remove();
+    actualizarTotal();
+    document.getElementById('guardarVenta').disabled = items.length === 0;
+}
+
+function actualizarTotal() {
+    total = items.reduce((sum, item) => sum + item.subtotal, 0);
+    document.getElementById('totalVenta').textContent = total.toFixed(2);
+}
+
+function guardarVenta(e) {
+    e.preventDefault();
+    
+    if (items.length === 0) {
+        Swal.fire('Error', 'Agregue al menos un item a la venta', 'error');
+        return;
+    }
+
+    const formData = new FormData(this);
+    formData.append('items', JSON.stringify(items));
+
+    Swal.fire({
+        title: '¿Confirmar venta?',
+        text: `Total a cobrar: Q.${total.toFixed(2)}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, confirmar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: 'Venta registrada correctamente',
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.href = data.redirect_url;
+                    });
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudo procesar la venta', 'error');
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

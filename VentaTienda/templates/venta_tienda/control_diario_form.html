@@ -1,0 +1,638 @@
+{% extends 'venta_tienda/base.html' %}
+{% load static %}
+{% load control_diario_tags %}
+
+{% block title %}Control Diario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .control-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .section-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .section-header {
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-header i {
+        font-size: 1.3rem;
+    }
+    
+    .table-modern {
+        margin-bottom: 0;
+    }
+    
+    .table-modern thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+    }
+    
+    .table-modern tbody td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+    }
+    
+    .table-modern tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    }
+    
+    .input-quantity {
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    .product-name {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .gasto-row {
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+        border: 1.5px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+    
+    .gasto-row:hover {
+        border-color: #cbd5e0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .btn-action {
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.95rem;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
+    .alert-info-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+    }
+    
+    .total-badge {
+        background-color: #f7fafc;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    {% if existe_control %}
+    <div class="alert alert-warning border-0 shadow-sm">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Ya existe un control diario registrado para el día de hoy.
+        <a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-sm btn-secondary ms-3">Volver al Menú</a>
+    </div>
+    {% else %}
+    
+    <!-- Botón Volver -->
+    <div class="mb-3">
+        <a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver al Menú
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="control-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-2 fw-bold text-dark">
+                    <i class="fas fa-clipboard-list me-2"></i> Control Diario
+                </h2>
+                <p class="mb-0 text-dark" style="opacity: 0.95;">
+                    <i class="fas fa-store me-2"></i>{{ tienda.nombre }}
+                </p>
+            </div>
+            <div class="text-end">
+                <h4 class="mb-2 text-dark">{{ fecha_hoy|date:"d/m/Y" }}</h4>
+                <p class="mb-0 text-dark" style="opacity: 0.95;">
+                    <i class="fas fa-user me-2"></i>{{ usuario_tienda.nombre_completo }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" id="formControlDiario">
+        {% csrf_token %}
+        
+
+<!-- TABLA 1: Productos y Saldos -->
+<div class="card section-card mb-4">
+    <div class="section-header bg-success text-white">
+        <i class="fas fa-boxes"></i>
+        <span>Productos y Saldos</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Producto</th>
+                        <th class="text-center">Inicio</th>
+                        <th class="text-center">Ingreso</th>
+                        <th class="text-center">Salida</th>
+                        <th class="text-center">Final</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos_saldos %}
+                    <tr>
+                        <td class="product-name">{{ producto }}</td>
+
+                        <!-- Inicio (autocargado del día anterior) -->
+                        <td style="width: 17%;">
+                            <input type="number" 
+                                   name="saldo_{{ producto|normalizar_campo }}_inicio" 
+                                   class="form-control input-quantity calc-input" 
+                                   step="0.5"
+                                   min="0"
+                                   value="{{ saldos_iniciales|dict_get:producto }}">
+                        </td>
+
+                        <!-- Ingreso -->
+                        <td style="width: 17%;">
+                            <input type="number" 
+                                   name="saldo_{{ producto|normalizar_campo }}_ingreso" 
+                                   class="form-control input-quantity calc-input" 
+                                   step="0.5"
+                                   min="0"
+                                   value="0">
+                        </td>
+
+                        <!-- Salida (nuevo) -->
+                        <td style="width: 17%;">
+                            <input type="number" 
+                                   name="saldo_{{ producto|normalizar_campo }}_salida" 
+                                   class="form-control input-quantity calc-input" 
+                                   step="0.5"
+                                   min="0"
+                                   value="0">
+                        </td>
+
+                        <!-- Final (autocalculado) -->
+                        <td style="width: 17%;">
+                            <input type="number" 
+                                   name="saldo_{{ producto|normalizar_campo }}_final" 
+                                   class="form-control input-quantity final-field" 
+                                   step="0.5"
+                                   min="0"
+                                   value="{{ saldos_iniciales|dict_get:producto }}"
+                                   readonly>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT PARA CALCULAR FINAL AUTOMÁTICO -->
+<script>
+document.addEventListener("input", function () {
+    // Buscar todas las filas
+    document.querySelectorAll("tr").forEach(function (row) {
+        const inicio = parseFloat(row.querySelector("[name*='_inicio']")?.value) || 0;
+        const ingreso = parseFloat(row.querySelector("[name*='_ingreso']")?.value) || 0;
+        const salida = parseFloat(row.querySelector("[name*='_salida']")?.value) || 0;
+        const finalField = row.querySelector("[name*='_final']");
+
+        if (finalField) {
+            const resultado = inicio + ingreso - salida;
+            finalField.value = resultado.toFixed(2);
+        }
+    });
+});
+</script>
+
+
+        <!-- TABLA 2: Venta por Producto -->
+        <div class="card section-card mb-4">
+            <div class="section-header bg-info text-white">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Venta por Producto</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0" id="tabla-venta-producto">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Producto</th>
+                                <th style="width: 20%;">Cantidad</th>
+                                <th style="width: 20%;">Precio Unitario (Q)</th>
+                                <th class="text-end" style="width: 20%;">Total (Q)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos_venta %}
+                            <tr>
+                                <td class="product-name">{{ producto }}</td>
+                                <td>
+                                    <input type="number"
+                                           name="venta_{{ producto|normalizar_campo }}_cantidad"
+                                           class="form-control venta-cantidad"
+                                           min="0"
+                                           step="1"
+                                           value="0">
+                                </td>
+                                <td>
+                                     <input type="number"
+                                         name="venta_{{ producto|normalizar_campo }}_precio"
+                                         class="form-control venta-precio"
+                                         step="0.01"
+                                         min="0"
+                                         value="{{ default_precios|dict_get:producto }}">
+                                </td>
+                                <td>
+                                    <input type="number"
+                                           name="venta_{{ producto|normalizar_campo }}_total"
+                                           class="form-control venta-total text-end"
+                                           step="0.01"
+                                           min="0"
+                                           value="0.00" readonly>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-light">
+                                <td colspan="2" class="text-end fw-bold fs-5">TOTAL DE VENTAS</td>
+                                <td>
+                                    <div class="total-badge text-end">
+                                        <span id="totalVentasCalculado">Q 0.00</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA 4: Gastos -->
+        <div class="card section-card mb-4">
+            <div class="section-header bg-danger text-white">
+                <i class="fas fa-receipt"></i>
+                <span>Gastos del Día</span>
+            </div>
+            <div class="card-body">
+                <div id="gastosContainer" class="mb-3">
+                    <!-- Los gastos se agregarán dinámicamente -->
+                </div>
+                <button type="button" class="btn btn-outline-success" id="btnAgregarGasto">
+                    <i class="fas fa-plus-circle me-2"></i>Agregar Gasto
+                </button>
+            </div>
+        </div>
+
+        <!-- TABLA 3: Resumen Financiero -->
+        <div class="card section-card mb-4">
+            <div class="section-header bg-warning text-dark">
+                <i class="fas fa-dollar-sign"></i>
+                <span>Resumen Financiero</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Total de Venta</label>
+                        {{ form.total_venta }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Gasto Diario</label>
+                        {{ form.gasto_diario }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Efectivo en Caja</label>
+                        {{ form.efectivo_caja }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Total a Depositar</label>
+                        {{ form.total_depositar }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">No. de Boleta</label>
+                        {{ form.no_boleta }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Total de Pollo Rey</label>
+                        {{ form.total_pollo_rey }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">No. Factura de Pollo Rey</label>
+                        {{ form.no_factura_pollo_rey }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Libras de Pollo</label>
+                        {{ form.libras_pollo }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Fecha Facturación</label>
+                        {{ form.fecha_facturacion }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+        <!-- TABLA 5: Fechas de Control -->
+        <div class="card section-card mb-4">
+            <div class="section-header bg-secondary text-white">
+                <i class="fas fa-calendar-check"></i>
+                <span>Fechas de Control</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    {% for concepto in conceptos_fechas %}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ concepto }}</label>
+                        <input type="date" 
+                               name="fecha_{{ concepto|normalizar_campo }}" 
+                               class="form-control">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA 6: Resumen Productos Específicos -->
+        <div class="card section-card mb-4">
+            <div class="section-header bg-dark text-white">
+                <i class="fas fa-chart-pie"></i>
+                <span>Resumen Productos Específicos</span>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info-custom mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Se genera automáticamente de las cantidades de <strong>Pollo, Papas y Ensaladas</strong> de la Tabla 2.
+                </div>
+                <table class="table table-modern mb-0">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th class="text-center">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="product-name">Pollo</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6" id="resumenPollo">-</span></td>
+                        </tr>
+                        <tr>
+                            <td class="product-name">Papas</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6" id="resumenPapas">-</span></td>
+                        </tr>
+                        <tr>
+                            <td class="product-name">Ensaladas</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6" id="resumenEnsaladas">-</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TABLA 7: Otros/Observaciones -->
+        <div class="card section-card mb-4">
+            <div class="section-header" style="background-color: #6c757d; color: white;">
+                <i class="fas fa-comment-dots"></i>
+                <span>Otros / Observaciones</span>
+            </div>
+            <div class="card-body">
+                {{ form.otros }}
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="text-center mb-5 pt-3">
+            <button type="button" class="btn btn-success btn-action btn-lg px-5 me-3" id="btnGuardar">
+                <i class="fas fa-save me-2"></i>Guardar Control Diario
+            </button>
+            <a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-secondary btn-action btn-lg px-5">
+                <i class="fas fa-times me-2"></i>Cancelar
+            </a>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let gastoCounter = 0;
+
+    // Agregar gasto dinámicamente
+    document.getElementById('btnAgregarGasto').addEventListener('click', function() {
+        const container = document.getElementById('gastosContainer');
+        const gastoHtml = `
+            <div class="gasto-row" data-gasto="${gastoCounter}">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-4">
+                        <input type="text" 
+                               name="gasto_descripcion_${gastoCounter}" 
+                               class="form-control" 
+                               placeholder="Descripción del gasto"
+                               required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" 
+                               name="gasto_factura_${gastoCounter}" 
+                               class="form-control" 
+                               placeholder="No. Factura">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" 
+                               name="gasto_cantidad_${gastoCounter}" 
+                               class="form-control gasto-cantidad text-end" 
+                               step="0.01"
+                               min="0"
+                               placeholder="0.00"
+                               required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger w-100 btn-eliminar-gasto">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', gastoHtml);
+        gastoCounter++;
+    });
+
+    // Eliminar gasto
+    document.getElementById('gastosContainer').addEventListener('click', function(e) {
+        if (e.target.closest('.btn-eliminar-gasto')) {
+            const gastoRow = e.target.closest('.gasto-row');
+            if (document.querySelectorAll('.gasto-row').length > 1) {
+                gastoRow.remove();
+                calcularTotales();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atención',
+                    text: 'Debe haber al menos un campo de gasto',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        }
+    });
+
+    // Calcular totales automáticamente
+    function calcularTotales() {
+        // Recalcular totales por fila
+        document.querySelectorAll('#tabla-venta-producto tbody tr').forEach(row => {
+            const cantidadInput = row.querySelector('.venta-cantidad');
+            const precioInput = row.querySelector('.venta-precio');
+            const totalInput = row.querySelector('.venta-total');
+            if (cantidadInput && precioInput && totalInput) {
+                const cantidad = parseInt(cantidadInput.value) || 0;
+                const precio = parseFloat(precioInput.value) || 0;
+                const total = cantidad * precio;
+                totalInput.value = total.toFixed(2);
+            }
+        });
+
+        // Total ventas
+        let totalVentas = 0;
+        document.querySelectorAll('.venta-total').forEach(input => {
+            totalVentas += parseFloat(input.value) || 0;
+        });
+        document.getElementById('totalVentasCalculado').textContent = 'Q ' + totalVentas.toFixed(2);
+        document.getElementById('id_total_venta').value = totalVentas.toFixed(2);
+
+        // Total gastos
+        let totalGastos = 0;
+        document.querySelectorAll('.gasto-cantidad').forEach(input => {
+            totalGastos += parseFloat(input.value) || 0;
+        });
+        document.getElementById('id_gasto_diario').value = totalGastos.toFixed(2);
+
+        // Total a depositar
+        const efectivoCaja = parseFloat(document.getElementById('id_efectivo_caja').value) || 0;
+        const totalDepositar = totalVentas - totalGastos;
+        document.getElementById('id_total_depositar').value = totalDepositar.toFixed(2);
+    }
+
+    // Escuchar cambios en ventas y gastos
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('venta-cantidad') ||
+            e.target.classList.contains('venta-precio') ||
+            e.target.classList.contains('gasto-cantidad') ||
+            e.target.id === 'id_efectivo_caja') {
+            calcularTotales();
+        }
+
+        // Actualizar resumen productos específicos
+        if (e.target.name === 'venta_pollo_cantidad') {
+            document.getElementById('resumenPollo').textContent = e.target.value || '-';
+        }
+        if (e.target.name === 'venta_papas_cantidad') {
+            document.getElementById('resumenPapas').textContent = e.target.value || '-';
+        }
+        if (e.target.name === 'venta_ensaladas_cantidad') {
+            document.getElementById('resumenEnsaladas').textContent = e.target.value || '-';
+        }
+    });
+
+    // Agregar un gasto inicial
+    document.getElementById('btnAgregarGasto').click();
+
+    // Confirmación con SweetAlert antes de guardar
+    document.getElementById('btnGuardar').addEventListener('click', function() {
+        Swal.fire({
+            title: '¿Confirmar Control Diario?',
+            html: `
+                <div class="text-start">
+                    <p class="mb-2"><strong>⚠️ Importante:</strong></p>
+                    <ul class="text-muted">
+                        <li>Solo se permite <strong>un registro por día</strong> por tienda</li>
+                        <li>Una vez guardado, no se podrá modificar</li>
+                        <li>Verifique que todos los datos sean correctos</li>
+                    </ul>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-check me-2"></i>Sí, guardar',
+            cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+            customClass: {
+                confirmButton: 'btn-action',
+                cancelButton: 'btn-action'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Guardando...',
+                    html: 'Por favor espere',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                document.getElementById('formControlDiario').submit();
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

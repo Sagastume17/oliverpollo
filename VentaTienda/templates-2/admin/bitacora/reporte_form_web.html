@@ -1,0 +1,157 @@
+{% extends 'Base/base.html' %}
+
+{% block title %}Generar Reporte de Movimientos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-chart-bar"></i> Reporte de Movimientos</h1>
+                <a href="{% url 'admin_empleados:bitacora_lista' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a Bitácora
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cog"></i> Configuración del Reporte</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Información:</strong> Este reporte mostrará todos los movimientos de la tienda seleccionada en la fecha especificada,
+                        incluyendo un resumen general, desglose por tipo (FEL e Inventario) y totales.
+                        {% if fechas_debug %}
+                            <br><strong>Fechas con movimientos:</strong> {{ fechas_debug|join:", " }}
+                        {% endif %}
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tienda_id" class="form-label">
+                                    <i class="fas fa-store"></i> Seleccionar Tienda <span class="text-danger">*</span>
+                                </label>
+                                <select name="tienda_id" id="tienda_id" class="form-select" required>
+                                    <option value="">-- Seleccione una tienda --</option>
+                                    {% for tienda in tiendas %}
+                                        <option value="{{ tienda.id }}">{{ tienda.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Seleccione la tienda para la cual desea generar el reporte.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_reporte" class="form-label">
+                                    <i class="fas fa-calendar"></i> Fecha del Reporte <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="fecha_reporte" id="fecha_reporte" class="form-control" 
+                                       value="{{ fecha_hoy }}" required max="{{ fecha_hoy }}">
+                                <div class="form-text">Seleccione la fecha para la cual desea generar el reporte.</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-list"></i> El reporte incluirá:</h6>
+                                        <ul class="mb-0">
+                                            <li><strong>Resumen General:</strong> Total de movimientos, cantidad de productos vendidos y monto total</li>
+                                            <li><strong>Desglose por Producto:</strong> Lista completa de todos los productos vendidos con cantidades</li>
+                                            <li><strong>Ventas FEL:</strong> Desglose específico de ventas con factura</li>
+                                            <li><strong>Registro de Inventario:</strong> Desglose específico de registros sin factura</li>
+                                            <li><strong>Totales:</strong> Resumen financiero del día</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button type="submit" name="generar_pdf" value="false" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-chart-bar"></i> Ver Reporte Web
+                                </button>
+                                <button type="submit" name="generar_pdf" value="true" class="btn btn-success btn-lg">
+                                    <i class="fas fa-file-pdf"></i> Generar PDF
+                                </button>
+                                <a href="{% url 'admin_empleados:bitacora_lista' %}" class="btn btn-outline-secondary btn-lg ms-3">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Notas Importantes</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>El reporte web se muestra directamente en el navegador con toda la información detallada</li>
+                        <li>El PDF se genera y abre en una nueva ventana para impresión</li>
+                        <li>Solo se incluyen movimientos del día seleccionado</li>
+                        <li>Los movimientos anulados no se incluyen en el reporte</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 FORMULARIO REPORTE - DOM Cargado');
+
+    // Actualizar fecha máxima
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha_reporte').setAttribute('max', today);
+    console.log('📅 Fecha máxima establecida:', today);
+
+    // Validación básica
+    document.querySelector('form').addEventListener('submit', function(e) {
+        console.log('📤 FORMULARIO ENVIADO');
+
+        const tienda = document.getElementById('tienda_id').value;
+        const fecha = document.getElementById('fecha_reporte').value;
+        const isPDF = e.submitter.value === 'true';
+
+        console.log('📊 Datos del formulario:');
+        console.log('   - Tienda ID:', tienda);
+        console.log('   - Fecha:', fecha);
+        console.log('   - Generar PDF:', isPDF);
+        console.log('   - Botón presionado:', e.submitter.textContent.trim());
+
+        if (!tienda || !fecha) {
+            console.log('❌ ERROR: Faltan datos');
+            e.preventDefault();
+            alert('Por favor seleccione la tienda y la fecha para generar el reporte.');
+            return false;
+        }
+
+        console.log('✅ Formulario válido, enviando...');
+    });
+
+    // Log de elementos del formulario
+    console.log('🔍 Elementos del formulario:');
+    console.log('   - Select tienda:', document.getElementById('tienda_id'));
+    console.log('   - Input fecha:', document.getElementById('fecha_reporte'));
+    console.log('   - Form:', document.querySelector('form'));
+});
+</script>
+{% endblock %}

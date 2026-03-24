@@ -1,0 +1,216 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+{% block title %}Lista de Cuadres{% endblock %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Cierre /</span> Lista de Cuadres
+    </h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Cuadres de Reporte</h5>
+                    <a href="{% url 'nuevo_cuadre' %}" class="btn btn-primary">
+                        <i class="bx bx-plus me-1"></i> Nuevo Cuadre
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-3">
+                                        <i class="bx bx-filter me-2"></i>Filtros de Búsqueda
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label">Tienda:</label>
+                                            <select class="form-select" id="filtro-tienda">
+                                                <option value="">Todas las tiendas</option>
+                                                {% for tienda in tiendas %}
+                                                    <option value="{{ tienda.id }}" {% if tienda_filtro == tienda.id|stringformat:"s" %}selected{% endif %}>
+                                                        {{ tienda.nombre }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label">Fecha Desde:</label>
+                                            <input type="date" class="form-control" id="fecha-desde" value="{{ fecha_desde }}">
+                                        </div>
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label">Fecha Hasta:</label>
+                                            <input type="date" class="form-control" id="fecha-hasta" value="{{ fecha_hasta }}">
+                                        </div>
+                                        <div class="col-md-3 col-sm-6">
+                                            <label class="form-label d-none d-sm-block">&nbsp;</label>
+                                            <div class="d-grid gap-2 d-md-flex">
+                                                <button type="button" class="btn btn-primary flex-fill" id="btn-filtrar">
+                                                    <i class="bx bx-search me-1"></i>Filtrar
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary flex-fill" id="btn-limpiar">
+                                                    <i class="bx bx-x me-1"></i>Limpiar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de cuadres -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center d-none d-md-table-cell">Tienda</th>
+                                    <th class="text-center d-none d-md-table-cell">Venta Total</th>
+                                    <th class="text-center d-none d-lg-table-cell">Gasto Diario</th>
+                                    <th class="text-center d-none d-lg-table-cell">Efectivo en Caja</th>
+                                    <th class="text-center d-none d-md-table-cell">Usuario</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cuadre in cuadres %}
+                                <tr>
+                                    <td class="text-center">
+                                        <strong>{{ cuadre.fecha|date:"d/m/Y" }}</strong>
+                                        <div class="d-md-none small text-muted">
+                                            {{ cuadre.tienda.nombre }}
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">{{ cuadre.tienda.nombre }}</td>
+                                    <td class="text-end d-none d-md-table-cell">
+                                        <span class="badge bg-success">Q{{ cuadre.venta_total|floatformat:2 }}</span>
+                                    </td>
+                                    <td class="text-end d-none d-lg-table-cell">
+                                        <span class="badge bg-warning">Q{{ cuadre.gasto_diario|floatformat:2 }}</span>
+                                    </td>
+                                    <td class="text-end d-none d-lg-table-cell">
+                                        <span class="badge bg-info">Q{{ cuadre.efectivo_caja|floatformat:2 }}</span>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>{{ cuadre.usuario.get_full_name }}</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'editar_cuadre' cuadre.pk %}">
+                                                        <i class="bx bx-edit-alt me-2"></i> Editar
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'generar_pdf_cuadre' cuadre.pk %}" target="_blank">
+                                                        <i class="bx bx-download me-2"></i> Descargar PDF
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="{% url 'eliminar_cuadre' cuadre.pk %}"
+                                                       onclick="return confirm('¿Está seguro de eliminar este cuadre?')">
+                                                        <i class="bx bx-trash me-2"></i> Eliminar
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Información adicional para móviles -->
+                                        <div class="d-md-none mt-2">
+                                            <div class="small">
+                                                <div class="text-success"><strong>Venta:</strong> Q{{ cuadre.venta_total|floatformat:2 }}</div>
+                                                <div class="text-warning"><strong>Gastos:</strong> Q{{ cuadre.gasto_diario|floatformat:2 }}</div>
+                                                <div class="text-info"><strong>Efectivo:</strong> Q{{ cuadre.efectivo_caja|floatformat:2 }}</div>
+                                                <div class="text-muted"><strong>Usuario:</strong> {{ cuadre.usuario.get_full_name }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            No hay cuadres registrados
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    {% if cuadres.has_other_pages %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if cuadres.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ cuadres.previous_page_number }}">Anterior</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in cuadres.paginator.page_range %}
+                                {% if cuadres.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if cuadres.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ cuadres.next_page_number }}">Siguiente</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Funcionalidad de filtros
+    $('#btn-filtrar').click(function() {
+        var tienda = $('#filtro-tienda').val();
+        var fechaDesde = $('#fecha-desde').val();
+        var fechaHasta = $('#fecha-hasta').val();
+        
+        var params = new URLSearchParams();
+        if (tienda) params.append('tienda', tienda);
+        if (fechaDesde) params.append('fecha_desde', fechaDesde);
+        if (fechaHasta) params.append('fecha_hasta', fechaHasta);
+        
+        window.location.href = '?' + params.toString();
+    });
+    
+    $('#btn-limpiar').click(function() {
+        $('#filtro-tienda').val('');
+        $('#fecha-desde').val('');
+        $('#fecha-hasta').val('');
+        window.location.href = window.location.pathname;
+    });
+});
+</script>
+{% endblock %}

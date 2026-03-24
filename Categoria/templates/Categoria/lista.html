@@ -1,0 +1,118 @@
+{% extends 'Base/base.html' %}
+{% block title %}Nueva Categoria{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+<script>
+  Swal.fire({
+    "title": "Informacion Sistema",
+    "text": "{{message}}",
+    "icon": "{{message.tags}}"
+  })
+</script>
+{% endfor %}
+{% endif %}
+
+<br></br>
+<div class="container" style="background-color: dark; margin-top: 5px; max-width: 70%;"><br>
+  <div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="row">
+      <!-- Basic Layout -->
+      <div class="col-md-12">
+        <div class="card md-6">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">Listado de Categorias</h5>
+            <small class="text-muted float-end">Lista Categoria</small>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive text-nowrap">
+
+              <input class="form-control col-md-3 light-table-filter" data-table="order-table" type="text"
+            placeholder="Buscar.." style="border: 1px solid black;" name="buscar" autofocus="buscar"><br>
+              
+            <table class="table table-bordered order-table">
+                <thead>
+                  <tr>
+                    <th>Id Categoria</th>
+                    <th>Nombre de Categoria</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for c in cate %}
+                  <tr>
+                    <td>{{c.id}}</td>
+                    <td>{{c.nombre}}</td>
+                    <td>
+                      <a href="{% url 'UpdateCategoria' c.id %}">
+                        <i style="color: yellowgreen;" class='bx bxs-edit' title="Modificar">Modificar</i>
+                      </a>
+                      <a href="{% url 'DeleteCategoria' c.id %}">
+                        <i style="color: red;" class='bx bxs-trash' title="Eliminar">Eliminar</i>
+                      </a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <caption>SIN CATEGORIAS</caption>
+                  {% endfor %}
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script type="text/javascript">
+  (function (document) {
+      'use strict';
+
+      var LightTableFilter = (function (Arr) {
+
+          var _input;
+
+          function _onInputEvent(e) {
+              _input = e.target;
+              var tables = document.getElementsByClassName(_input.getAttribute('data-table'));
+              Arr.forEach.call(tables, function (table) {
+                  Arr.forEach.call(table.tBodies, function (tbody) {
+                      Arr.forEach.call(tbody.rows, _filter);
+                  });
+              });
+          }
+
+          function _filter(row) {
+              var text = row.textContent.toLowerCase(), val = _input.value.toLowerCase();
+              row.style.display = text.indexOf(val) === -1 ? 'none' : 'table-row';
+          }
+
+          return {
+              init: function () {
+                  var inputs = document.getElementsByClassName('light-table-filter');
+                  Arr.forEach.call(inputs, function (input) {
+                      input.oninput = _onInputEvent;
+                  });
+              }
+          };
+      })(Array.prototype);
+
+      document.addEventListener('readystatechange', function () {
+          if (document.readyState === 'complete') {
+              LightTableFilter.init();
+          }
+      });
+
+  })(document);
+</script>
+
+
+{% endblock %}

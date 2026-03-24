@@ -1,0 +1,567 @@
+{% extends 'venta_tienda/base.html' %}
+
+{% block content %}
+<style>
+    .parent {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+        gap: 8px;
+        height: calc(100vh - 40px);
+    }
+    
+    .div1 {
+        grid-row: span 3 / span 3;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .div2 {
+        grid-column: span 4 / span 4;
+        grid-row: span 3 / span 3;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .div3 {
+        grid-column: span 4 / span 4;
+        grid-row: span 2 / span 2;
+        grid-row-start: 4;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .div4 {
+        grid-row: span 2 / span 2;
+        grid-column-start: 5;
+        grid-row-start: 4;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .productos-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .producto-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #e9ecef;
+    }
+
+    .producto-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border-color: #007bff;
+    }
+
+    .producto-img {
+        width: 100%;
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+    }
+
+    .categoria-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .categoria-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .categoria-item.active {
+        background-color: #e7f5ff;
+        border-left: 4px solid #0d6efd;
+    }
+    
+    .cart-table th, .cart-table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+    
+    .btn-action {
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+        min-height: 45px;
+    }
+</style>
+
+<a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-warning mb-3">
+    Regresar a Menu
+</a>
+
+<div class="parent">
+    <!-- Sidebar de categorías -->
+    <div class="div1">
+        <h4 class="mb-3">Categorías</h4>
+        <div id="categorias-container">
+            {% for categoria in categorias %}
+            <div class="categoria-item d-flex align-items-center" data-id="{{ categoria.id }}">
+                {% if categoria.imagen %}
+    <img src="{{ categoria.imagen.url }}" class="me-2 rounded-circle" 
+         style="width:40px; height:40px; object-fit:cover;" 
+         alt="{{ categoria.nombre }}"
+         onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><rect width=&quot;100&quot; height=&quot;100&quot; fill=&quot;%23f0f0f0&quot;/><text x=&quot;50&quot; y=&quot;50&quot; font-family=&quot;Arial&quot; font-size=&quot;16&quot; fill=&quot;%23666&quot; text-anchor=&quot;middle&quot; dominant-baseline=&quot;middle&quot;>CAT</text></svg>'">
+{% else %}
+    <div class="me-2 rounded-circle d-flex align-items-center justify-content-center" 
+         style="width:40px; height:40px; background-color:#6c757d; color:white; font-size:12px;">
+        CAT
+    </div>
+{% endif %}
+
+                <h5 class="mb-0">{{ categoria.nombre }}</h5>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Productos de la categoría seleccionada -->
+    <div class="div2">
+        <h4 class="mb-3">Productos</h4>
+        <div id="productos-container" class="productos-container">
+            {% for producto in productos %}
+            <div class="producto-card" data-id="{{ producto.id }}" data-nombre="{{ producto.nombre }}" data-precio="{{ producto.precio }}">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" class="producto-img" 
+                         alt="{{ producto.nombre }}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 120\"><rect width=\"200\" height=\"120\" fill=\"%23f8f9fa\"/><text x=\"100\" y=\"60\" font-family=\"Arial\" font-size=\"16\" fill=\"%236c757d\" text-anchor=\"middle\" dominant-baseline=\"middle\">{{ producto.nombre }}</text></svg>'">
+                {% else %}
+                    <img src="data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 200 120\"><rect width=\"200\" height=\"120\" fill=\"%23f8f9fa\"/><text x=\"100\" y=\"60\" font-family=\"Arial\" font-size=\"16\" fill=\"%236c757d\" text-anchor=\"middle\" dominant-baseline=\"middle\">{{ producto.nombre }}</text></svg>" 
+                         class="producto-img" alt="{{ producto.nombre }}">
+                {% endif %}
+                <div class="mt-2">
+                    <h6 class="mb-1">{{ producto.nombre }}</h6>
+                    <p class="text-muted small mb-1">{{ producto.unidad_medida }}</p>
+                    <p class="text-primary fw-bold mb-0">Q{{ producto.precio|floatformat:2 }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center p-5">
+                <p>Seleccione una categoría para ver los productos</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Carrito de compra -->
+    <div class="div3">
+        <h4 class="mb-3">Detalle de Venta</h4>
+
+        <!-- Información del Cliente -->
+        <div class="card mb-3" style="background-color: #f8f9fa;">
+            <div class="card-body p-2">
+                <h6 class="card-title mb-2">Datos Cliente</h6>
+                <div class="row g-1">
+                    <div class="col-4">
+                        <input type="text" id="cliente-nit" name="nit" class="form-control form-control-sm" placeholder="NIT" value="CF" readonly>
+                    </div>
+                    <div class="col-8">
+                        <input type="text" id="cliente-nombre" name="nombre" class="form-control form-control-sm" placeholder="Nombre" value="Consumidor Final" readonly>
+                    </div>
+                </div>
+                <div class="row g-1 mt-1">
+                    <div class="col-12">
+                        <input type="text" id="cliente-direccion" name="direccion" class="form-control form-control-sm" placeholder="Dirección" value="Ciudad" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table cart-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="cart-items">
+                    <!-- Los items del carrito se cargarán aquí -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                        <td id="cart-total">Q0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Formulario de observaciones -->
+        <div class="mb-3">
+            <label for="id_observaciones" class="form-label">Observaciones:</label>
+            <textarea class="form-control" id="id_observaciones" rows="2"></textarea>
+        </div>
+    </div>
+    
+    <!-- Sidebar de acciones -->
+    <div class="div4">
+        <button id="btn-procesar" class="btn btn-success btn-action w-100 mb-2">
+            <i class="fas fa-cash-register"></i> Procesar Venta
+        </button>
+        
+        <button id="btn-cliente" class="btn btn-primary btn-action w-100 mb-2">
+            <i class="fas fa-user"></i> Cliente
+        </button>
+
+        <button id="btn-reimpresion" class="btn btn-secondary btn-action w-100 mb-2">
+            <i class="fas fa-print"></i> Reimpresión
+        </button>
+        
+        <button id="btn-cancelar" class="btn btn-danger btn-action w-100">
+            <i class="fas fa-trash-alt"></i> Cancelar
+        </button>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de procesar esta venta?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirmar-venta">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de éxito -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Venta Procesada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>La venta ha sido procesada correctamente.</p>
+                <p>ID de Venta: <span id="venta-id"></span></p>
+                <a id="ver" href="" class="btn btn-danger" target="_blank">FACTURA</a>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables globales
+    let carrito = [];
+    
+    // Función para obtener el CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $(document).ready(function() {
+        // Configuración inicial
+        const csrftoken = getCookie('csrftoken');
+        
+        // Evento para seleccionar categoría
+        $('.categoria-item').click(function() {
+            const categoriaId = $(this).data('id');
+            
+            // Marcar categoría como activa
+            $('.categoria-item').removeClass('active');
+            $(this).addClass('active');
+            
+            // Cargar productos de la categoría
+            $.ajax({
+                url: `/venta-tienda/api/productos-categoria/${categoriaId}/`,
+                type: 'GET',
+                success: function(data) {
+                    let html = '';
+                    if (data.items && data.items.length > 0) {
+                        data.items.forEach(function(producto) {
+                            html += `
+                                <div class="producto-card" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}">
+                                    ${producto.imagen ? 
+                                        `<img src="${producto.imagen}" class="producto-img" alt="${producto.nombre}" 
+                                              onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 200 120\\'><rect width=\\'200\\' height=\\'120\\' fill=\\'%23f8f9fa\\'/><text x=\\'100\\' y=\\'60\\' font-family=\\'Arial\\' font-size=\\'16\\' fill=\\'%236c757d\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'>${producto.nombre}</text></svg>'">` : 
+                                        `<img src="data:image/svg+xml;charset=UTF-8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 200 120\\'><rect width=\\'200\\' height=\\'120\\' fill=\\'%23f8f9fa\\'/><text x=\\'100\\' y=\\'60\\' font-family=\\'Arial\\' font-size=\\'16\\' fill=\\'%236c757d\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'>${producto.nombre}</text></svg>" 
+                                              class="producto-img" alt="${producto.nombre}">`}
+                                    <div class="mt-2">
+                                        <h6 class="mb-1">${producto.nombre}</h6>
+                                        <p class="text-muted small mb-1">${producto.medida}</p>
+                                        <p class="text-primary fw-bold mb-0">Q${producto.precio.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html = '<div class="text-center p-5"><p>No hay productos en esta categoría</p></div>';
+                    }
+                    $('#productos-container').html(html);
+                },
+                error: function(error) {
+                    console.error('Error al cargar productos:', error);
+                    $('#productos-container').html('<p class="text-danger">Error al cargar productos</p>');
+                }
+            });
+        });
+
+        // Evento para añadir producto al carrito
+        $(document).on('click', '.producto-card', function() {
+            const id = $(this).data('id');
+            const nombre = $(this).data('nombre');
+            const precio = $(this).data('precio');
+            
+            // Verificar si el producto ya está en el carrito
+            const itemExistente = carrito.find(item => item.id === id);
+            
+            if (itemExistente) {
+                itemExistente.cantidad++;
+                itemExistente.subtotal = itemExistente.cantidad * itemExistente.precio;
+            } else {
+                carrito.push({
+                    id: id,
+                    nombre: nombre,
+                    precio: precio,
+                    cantidad: 1,
+                    subtotal: precio
+                });
+            }
+            
+            actualizarCarrito();
+            
+            // Feedback visual
+            Swal.fire({
+                icon: 'success',
+                title: 'Agregado al carrito',
+                text: `${nombre} agregado correctamente`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        });
+
+        // Botón para procesar venta
+        $('#btn-procesar').click(function() {
+            if (carrito.length === 0) {
+                Swal.fire('Carrito vacío', 'No hay productos en el carrito', 'warning');
+                return;
+            }
+            
+            $('#confirmModal').modal('show');
+        });
+
+        // Confirmar venta
+        $('#btn-confirmar-venta').click(function() {
+            const observaciones = $('#id_observaciones').val();
+            const data = {
+                productos: carrito,
+                observaciones: observaciones,
+                cliente: {
+                    nit: $('#cliente-nit').val(),
+                    nombre: $('#cliente-nombre').val(),
+                    direccion: $('#cliente-direccion').val()
+                }
+            };
+            
+            $.ajax({
+                url: '/venta-tienda/api/procesar-venta/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#confirmModal').modal('hide');
+                        $('#venta-id').text(response.venta_id);
+                        $('#link').text(response.link);
+                        $('#successModal').modal('show');
+                        document.getElementById("ver").href = response.link;
+                        
+                        // Limpiar carrito
+                        carrito = [];
+                        actualizarCarrito();
+                        
+                        // Limpiar campos del cliente
+                        $('#cliente-nit').val('CF');
+                        $('#cliente-nombre').val('Consumidor Final');
+                        $('#cliente-direccion').val('Ciudad');
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                },
+                error: function(error) {
+                    console.error('Error al procesar venta:', error);
+                    Swal.fire('Error', 'Ocurrió un error al procesar la venta', 'error');
+                }
+            });
+        });
+
+        // Botón cliente
+        $('#btn-cliente').click(function() {
+            Swal.fire({
+                title: 'Información del Cliente',
+                html: `
+                    <div class="mb-3">
+                        <label class="form-label">NIT:</label>
+                        <input id="cliente-nit-modal" class="form-control" placeholder="Ingrese NIT (opcional)" value="${$('#cliente-nit').val()}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Cliente:</label>
+                        <input id="cliente-nombre-modal" class="form-control" placeholder="Ingrese nombre del cliente" value="${$('#cliente-nombre').val()}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dirección:</label>
+                        <textarea id="cliente-direccion-modal" class="form-control" placeholder="Ingrese dirección (opcional)">${$('#cliente-direccion').val()}</textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const nombre = $('#cliente-nombre-modal').val().trim();
+                    if (!nombre) {
+                        Swal.showValidationMessage('El nombre del cliente es requerido');
+                        return false;
+                    }
+                    return {
+                        nit: $('#cliente-nit-modal').val().trim() || 'C/F',
+                        nombre: nombre,
+                        direccion: $('#cliente-direccion-modal').val().trim() || 'Ciudad'
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#cliente-nit').val(result.value.nit);
+                    $('#cliente-nombre').val(result.value.nombre);
+                    $('#cliente-direccion').val(result.value.direccion);
+                    
+                    Swal.fire('Guardado', 'Información del cliente actualizada', 'success');
+                }
+            });
+        });
+
+        // Botón cancelar
+        $('#btn-cancelar').click(function() {
+            if (carrito.length > 0) {
+                Swal.fire({
+                    title: '¿Cancelar venta?',
+                    text: 'Se perderán todos los productos del carrito',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Sí, cancelar',
+                    cancelButtonText: 'Continuar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        carrito = [];
+                        actualizarCarrito();
+                    }
+                });
+            } else {
+                Swal.fire('Carrito vacío', 'No hay productos para cancelar', 'info');
+            }
+        });
+    });
+
+    // Función para actualizar el carrito
+    function actualizarCarrito() {
+        let html = '';
+        let total = 0;
+        
+        carrito.forEach(function(item, index) {
+            html += `
+                <tr>
+                    <td>${item.nombre}</td>
+                    <td>Q${item.precio.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="cambiarCantidad(${index}, -1)">-</button>
+                        <span class="mx-2">${item.cantidad}</span>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="cambiarCantidad(${index}, 1)">+</button>
+                    </td>
+                    <td>Q${item.subtotal.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            total += item.subtotal;
+        });
+        
+        $('#cart-items').html(html);
+        $('#cart-total').text(`Q${total.toFixed(2)}`);
+    }
+
+    // Función para cambiar cantidad
+    function cambiarCantidad(index, cambio) {
+        if (carrito[index]) {
+            carrito[index].cantidad += cambio;
+            
+            if (carrito[index].cantidad <= 0) {
+                carrito.splice(index, 1);
+            } else {
+                carrito[index].subtotal = carrito[index].cantidad * carrito[index].precio;
+            }
+            
+            actualizarCarrito();
+        }
+    }
+
+    // Función para eliminar producto del carrito
+    function eliminarDelCarrito(index) {
+        carrito.splice(index, 1);
+        actualizarCarrito();
+    }
+</script>
+{% endblock %}

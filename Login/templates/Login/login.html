@@ -1,0 +1,149 @@
+{% extends 'Login/baselogin.html' %}
+{% load static %}
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        "title": "Informacion Sistema",
+        "text": "{{message}}",
+        "icon": "{{message.tags}}"
+    })
+</script>
+{% endfor %}
+{% endif %}
+
+<div class="container-xxl">
+    <div class=" authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+            <!-- Register -->
+            <div class="card">
+                <div class="card-body">
+                    <!-- Logo -->
+                    <div class="app-brand justify-content-center">
+                        <a href="#" class="app-brand-link gap-2">
+                            <span class="app-brand-logo demo">
+                                <img src="{% static 'Login/assets/img/logo-2.webp' %}" width="100" height="100" >
+                            </span>
+                        </a>
+                    </div>
+                    <h3 align="center">FRITURAS DE ORIENTE</h3>
+                    <!-- /Logo -->
+                    <!-- Tabs para tipos de usuario -->
+                    <ul class="nav nav-tabs mb-3" id="loginTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab">
+                                <i class="bx bx-user-circle"></i> Administrador
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tienda-tab" data-bs-toggle="tab" data-bs-target="#tienda" type="button" role="tab">
+                                <i class="bx bx-store"></i> Empleado
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="loginTabContent">
+                        <!-- Login Administrador -->
+                        <div class="tab-pane fade show active" id="admin" role="tabpanel">
+                            <form class="mb-3" action="#" method="POST">{% csrf_token %}
+                                <input type="hidden" name="login_type" value="admin">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Usuario</label>
+                                    {{form.username}}
+                                </div>
+                                <div class="mb-3 form-password-toggle">
+                                    <div class="d-flex justify-content-between">
+                                        <label class="form-label" for="password">Contraseña</label>
+                                    </div>
+                                    <div class="input-group input-group-merge">
+                                        {{form.password}}
+                                        <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <button class="btn btn-primary d-grid w-100" type="submit">
+                                        <i class="bx bx-log-in"></i> Iniciar como Admin
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Login Empleado Tienda -->
+                        <div class="tab-pane fade" id="tienda" role="tabpanel">
+                            <form class="mb-3" action="#" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                <input type="hidden" name="login_type" value="tienda">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Usuario</label>
+                                    {{form_tienda.username}}
+                                </div>
+                                <div class="mb-3 form-password-toggle">
+                                    <div class="d-flex justify-content-between">
+                                        <label class="form-label" for="password">Password</label>
+                                    </div>
+                                    <div class="input-group input-group-merge">
+                                        {{form_tienda.password}}
+                                        <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <button class="btn btn-success d-grid w-100" type="submit">
+                                        <i class="bx bx-store"></i> Iniciar como Empleado
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <p class="text-center">
+                        <span>Diseñado por </span>
+                        <a href="#">
+                            <span>MultiServicios Sagastume</span>
+                        </a><br>
+                        <span>Derechos Reservados 2025</span>
+                    </p>
+                </div>
+            </div>
+            <!-- /Register -->
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Asegurar que el login_type correcto se envíe
+    const adminForm = document.querySelector('#admin form');
+    const tiendaForm = document.querySelector('#tienda form');
+
+    if (adminForm) {
+        adminForm.addEventListener('submit', function(e) {
+            console.log('Enviando formulario admin');
+            const loginTypeInput = this.querySelector('input[name="login_type"]');
+            if (loginTypeInput) {
+                loginTypeInput.value = 'admin';
+            }
+        });
+    }
+
+    if (tiendaForm) {
+        tiendaForm.addEventListener('submit', function(e) {
+            console.log('Enviando formulario tienda');
+            const loginTypeInput = this.querySelector('input[name="login_type"]');
+            if (loginTypeInput) {
+                loginTypeInput.value = 'tienda';
+            }
+        });
+    }
+
+    // Debug: Mostrar qué tab está activo
+    const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            console.log('Tab activo:', e.target.id);
+        });
+    });
+});
+</script>
+
+{% endblock %}

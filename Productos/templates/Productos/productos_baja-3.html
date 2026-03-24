@@ -1,0 +1,38 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="margin-top: 75px;">
+  <h4>PRODUCTOS DADOS DE BAJA</h4><br>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <td>Producto</td>
+          <td>Unidad Medida</td>
+          <td>Stock</td>
+          <td>Tienda</td>
+          <td>Acciones</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in productos %}
+          <tr>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.medida }}</td>
+            <td>{{ p.stock }}</td>
+            <td>{{ p.tienda.nombre }}</td>
+            <td>
+              <a href="{% url 'CambiarEstadoProducto' p.id %}" style="color: green;">Activar</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">SIN PRODUCTOS DADOS DE BAJA</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'Base/base.html' %}
+{% block title %}Nuevo Password{% endblock %}
+{% block content %}
+
+
+    <br>
+
+<div class="container">
+  </div>
+
+<br>
+<div class="col-10">
+    <div class="card my-6">
+<div class="container" style="background-color: white;"><br>
+    <div class="row">
+        <div class="col-md8">
+            <h3>MODIFICACION DE CLAVE</h3>
+        </div>
+        <div class="col-md-6" align="right">
+         
+        </div>
+    </div><br>
+
+    <form action="#" method="POST" enctype="multipart/form-data">{% csrf_token %}
+
+        <div class="row">
+<br>
+            <div class="col-md-3">
+            <label class="form-label">Nueva Clave</label>
+                <input type="password" class="form-control" placeholder="Nuevo Password" name="nuevo">
+            </div>
+            
+
+        </div>
+
+        
+
+       
+
+        <div class="row">
+            <br>
+            <div class="col-md-10" align="center"><br>
+                <button type="submit" class="btn btn-m btn-success">Actualizar</button>
+                <button type="reset" class="btn btn-m btn-danger">Cancelar</button>
+            </div>
+
+        </div>
+
+        <br>
+    </form>
+
+</div>
+<br>
+</div>
+
+<script>
+    function clic() {
+        var anterior = document.getElementById("anterior").value;
+        var actual = document.getElementById("actual").value;
+
+
+        var resultado = parseFloat(actual) - parseInt(anterior);
+
+        var consumo = document.getElementById('consumo').value = resultado;
+    }
+</script>
+
+{% endblock %}

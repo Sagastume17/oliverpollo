@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Karaluna</title>
+        <link rel="stylesheet" href="{% static 'Web/css/normalize.css' %}">
+        <link rel="stylesheet" href="{% static 'Web/css/main.css' %}" media="screen" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Playball' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="{% static 'Web/css/bootstrap.css' %}">
+        <link rel="stylesheet" href="{% static 'Web/css/style-portfolio.css' %}">
+        <link rel="stylesheet" href="{% static 'Web/css/picto-foundry-food.css' %}" />
+        <link rel="stylesheet" href="{% static 'Web/css/jquery-ui.css' %}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="{% static 'Web/css/font-awesome.min.css' %}" rel="stylesheet">
+        <link rel="icon" href="{% static 'Web/images/logo.jpg' %}" type="image/x-icon">
+
+        <style>
+            .green-link {
+              color: green !important;
+            }
+          </style>
+    </head>
+
+    <body>
+
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="row">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <a class="navbar-brand green-link" type="button" href="{% url 'Login' %}">Ingresar</a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                       
+                        <a class="navbar-brand" href="{% url 'Web' %}">Restaurante</a>
+            
+                    </div>
+
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav main-nav  clear navbar-right ">
+                            <li><a class="navactive color_animation" href="#top">INICIO</a></li>
+                            <li><a class="color_animation" href="#story">CARNES</a></li>
+                            <li><a class="color_animation" href="#pricing">MENU</a></li>
+                            <li><a class="color_animation" href="#beer">BEBIDAS</a></li>
+                            <li><a class="color_animation" href="#bread">POSTRES</a></li>
+                            <li><a class="color_animation" href="#featured">APERITIVOS</a></li>
+                            <li><a class="color_animation" href="#reservation">RESERVACIONES</a></li>
+                            <li><a class="color_animation" href="#contact">CONTACTANOS</a></li>
+
+                        </ul>
+                    </div><!-- /.navbar-collapse -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </nav>
+         
+
+        {% block content %}
+        {% endblock %}
+
+        <!-- ============ Footer Section  ============= -->
+
+        <footer class="sub_footer">
+            <div class="container">
+                <div class="col-md-4"><p class="sub-footer-text text-center">&copy; Restaurante Karaluna 2024, Creado por <a href="#">Multiservicios Sagastume</a></p></div>
+                <div class="col-md-4"><p class="sub-footer-text text-center">Regresar <a href="#top">INICIO</a></p>
+                </div>
+            <!--     <div class="col-md-4"><p class="sub-footer-text text-center">Built With Care By <a href="#" target="_blank">Us</a></p></div>-->
+            </div>
+        </footer>
+
+
+         <!-- ============ Script Section  ============= -->
+        <script type="text/javascript" src="{% static 'Web/js/jquery-1.10.2.min.js' %}"> </script>
+        <script type="text/javascript" src="{% static 'Web/js/bootstrap.min.js' %}" ></script>
+        <script type="text/javascript" src="{% static 'Web/js/jquery-1.10.2.js' %}"></script>     
+        <script type="text/javascript" src="{% static 'Web/js/jquery.mixitup.min.js' %}" ></script>
+        <script type="text/javascript" src="{% static 'Web/js/main.js' %}" ></script>
+
+
+
+    </body>
+</html>

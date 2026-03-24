@@ -1,0 +1,321 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+{% block title %}Nuevo Cuadre de Reporte{% endblock %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Cierre /</span> Nuevo Cuadre de Reporte
+    </h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Información del Cuadre</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="cuadre-form">
+                        {% csrf_token %}
+                        
+                        <!-- Campos principales -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="id_fecha">{{ form.fecha.label }}</label>
+                                {{ form.fecha }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="id_tienda">{{ form.tienda.label }}</label>
+                                {{ form.tienda }}
+                            </div>
+                         <!--   <div class="col-md-4">
+                                <label class="form-label" for="id_numero_boleta">{{ form.numero_boleta.label }}</label>
+                                {{ form.numero_boleta }}
+                            </div>  -->
+                        </div>
+
+                        <!-- Fechas de control -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="id_fecha_empanizado">{{ form.fecha_empanizado.label }}</label>
+                                {{ form.fecha_empanizado }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="id_fecha_gas">{{ form.fecha_gas.label }}</label>
+                                {{ form.fecha_gas }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="id_fecha_cambio_aceite">{{ form.fecha_cambio_aceite.label }}</label>
+                                {{ form.fecha_cambio_aceite }}
+                            </div>
+                        </div>
+
+                        <!-- Sección de Resumen Financiero -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">Resumen Financiero</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Ventas del Día</label>
+                                            <div class="form-control" id="preview-ventas" style="background-color: #e8f5e8; font-weight: bold;">
+                                                Q0.00
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Gastos del Día</label>
+                                            <div class="form-control" id="preview-gastos" style="background-color: #ffebee; font-weight: bold;">
+                                                Q0.00
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Resultado Neto</label>
+                                            <div class="form-control" id="preview-cierre" style="background-color: #e3f2fd; font-weight: bold; color: #1976d2;">
+                                                Q0.00
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Efectivo</label>
+                                            <input type="number" name="faltante" 
+                                                   id="id_faltante" 
+                                                   class="form-control"
+                                                   step="0.01"
+                                                   min="0"
+                                                   value="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Total a Depositar</label>
+                                            <input type="number" name="total_depositar" 
+                                                   id="total_depositar" 
+                                                   class="form-control"
+                                                   style="background-color: #e8f5e8; 
+                                                          font-weight: bold; 
+                                                          border: 2px solid #4caf50;
+                                                          color: #1b5e20;
+                                                          text-align: center;
+                                                          font-size: 16px;"
+                                                   readonly
+                                                   value="0.00">
+                                            <!-- Campo oculto para el valor real -->
+                                            <input type="hidden" name="efectivo_caja" id="id_efectivo_caja" value="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label" for="id_numero_boleta">{{ form.numero_boleta.label }}</label>
+                                            {{ form.numero_boleta }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos de ventas y gastos (ocultos pero necesarios) -->
+                        {{ form.venta_total.as_hidden }}
+                        {{ form.gasto_diario.as_hidden }}
+                        {{ form.efectivo_caja.as_hidden }}
+
+                        <!-- Información de Pollo Rey -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="id_total_pollo_rey">{{ form.total_pollo_rey.label }}</label>
+                                {{ form.total_pollo_rey }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="id_numero_factura_pollo">{{ form.numero_factura_pollo.label }}</label>
+                                {{ form.numero_factura_pollo }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="id_libras_pollo">{{ form.libras_pollo.label }}</label>
+                                {{ form.libras_pollo }}
+                            </div>
+                        </div>
+
+                        <!-- Campo otros -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label" for="id_otros">{{ form.otros.label }}</label>
+                                {{ form.otros }}
+                            </div>
+                        </div>
+
+                        <!-- Sección de Control de Inventario -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Control de Inventario</h5>
+                                <small class="text-muted">Datos calculados automáticamente</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped" id="inventario-table">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Stock Inicial</th>
+                                                <th>Ingreso</th>
+                                                <th>Venta</th>
+                                                <th>Stock Final</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="inventario-tbody">
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-4">
+                                                    <i class="bx bx-info-circle me-2"></i>
+                                                    Seleccione una tienda y fecha para ver el inventario
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot id="inventario-tfoot" style="display: none;">
+                                            <tr class="table-info">
+                                                <th>TOTALES</th>
+                                                <th id="total-stock-inicial">0</th>
+                                                <th id="total-ingreso">0</th>
+                                                <th id="total-venta">0</th>
+                                                <th id="total-stock-final">0</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Guardar Cuadre</button>
+                            <a href="{% url 'listar_cuadres' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Función para calcular el total a depositar
+    function calcularTotalDepositar() {
+        var ventas = parseFloat($('#id_venta_total').val()) || 0;
+        var gastos = parseFloat($('#id_gasto_diario').val()) || 0;
+        var faltante = parseFloat($('#id_faltante').val()) || 0;
+        
+        // CALCULO CORREGIDO: Ventas - Gastos + Faltante
+        var totalDepositar = ventas - gastos + faltante;
+        
+        // Actualizar ambos campos
+        $('#total_depositar').val(totalDepositar.toFixed(2));
+        $('#id_efectivo_caja').val(totalDepositar.toFixed(2));
+        
+        console.log('Cálculo:', ventas, '-', gastos, '+', faltante, '=', totalDepositar);
+    }
+
+    // Función para actualizar la previsualización
+    function actualizarPreview() {
+        var tienda = $('#id_tienda').val();
+        var fecha = $('#id_fecha').val();
+        
+        if (tienda && fecha) {
+            $.ajax({
+                url: '{% url "actualizar_preview_cuadre" %}',
+                type: 'GET',
+                data: {
+                    'tienda': tienda,
+                    'fecha': fecha
+                },
+                success: function(data) {
+                    console.log('Datos recibidos:', data);
+                    
+                    // Actualizar campos ocultos del formulario
+                    $('#id_venta_total').val(data.venta_total.toFixed(2));
+                    $('#id_gasto_diario').val(data.gasto_diario.toFixed(2));
+                    
+                    // Calcular y mostrar total inicial (sin faltante)
+                    var totalInicial = data.venta_total - data.gasto_diario;
+                    $('#total_depositar').val(totalInicial.toFixed(2));
+                    $('#id_efectivo_caja').val(totalInicial.toFixed(2));
+                    
+                    // Actualizar previsualización
+                    $('#preview-ventas').text('Q' + data.venta_total.toFixed(2));
+                    $('#preview-gastos').text('Q' + data.gasto_diario.toFixed(2));
+                    $('#preview-cierre').text('Q' + totalInicial.toFixed(2));
+                    
+                    // Actualizar tabla de inventario
+                    var inventarioHtml = '';
+                    var totalStockInicial = 0;
+                    var totalIngreso = 0;
+                    var totalVenta = 0;
+                    var totalStockFinal = 0;
+
+                    if (data.inventario && data.inventario.length > 0) {
+                        data.inventario.forEach(function(item) {
+                            inventarioHtml += '<tr>' +
+                                '<td>' + item.nombre + '</td>' +
+                                '<td class="text-end">' + Math.round(item.stock_inicial) + '</td>' +
+                                '<td class="text-end">' + Math.round(item.ingreso) + '</td>' +
+                                '<td class="text-end">' + Math.round(item.venta) + '</td>' +
+                                '<td class="text-end fw-bold">' + Math.round(item.stock_final) + '</td>' +
+                                '</tr>';
+                            
+                            totalStockInicial += item.stock_inicial;
+                            totalIngreso += item.ingreso;
+                            totalVenta += item.venta;
+                            totalStockFinal += item.stock_final;
+                        });
+                        
+                        // Mostrar totales
+                        $('#inventario-tfoot').show();
+                        $('#total-stock-inicial').text(Math.round(totalStockInicial));
+                        $('#total-ingreso').text(Math.round(totalIngreso));
+                        $('#total-venta').text(Math.round(totalVenta));
+                        $('#total-stock-final').text(Math.round(totalStockFinal));
+                    } else {
+                        inventarioHtml = '<tr><td colspan="5" class="text-center text-muted py-4">No hay productos para mostrar</td></tr>';
+                        $('#inventario-tfoot').hide();
+                    }
+                    $('#inventario-tbody').html(inventarioHtml);
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error al actualizar la previsualización:', error);
+                    alert('Error al cargar datos. Verifica la consola para más detalles.');
+                }
+            });
+        }
+    }
+    
+    // Eventos para cambios
+    $('#id_tienda, #id_fecha').change(function() {
+        actualizarPreview();
+    });
+    
+    $('#id_faltante').on('input change', function() {
+        calcularTotalDepositar();
+    });
+    
+    // Actualizar al cargar la página si ya hay valores
+    if ($('#id_tienda').val() && $('#id_fecha').val()) {
+        actualizarPreview();
+    }
+    
+    // También calcular cuando se modifiquen manualmente ventas o gastos
+    $('#id_venta_total, #id_gasto_diario').on('input', function() {
+        calcularTotalDepositar();
+    });
+});
+</script>
+{% endblock %}

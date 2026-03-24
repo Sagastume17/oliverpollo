@@ -1,0 +1,98 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+<script>
+  Swal.fire({
+    "title": "Informacion Sistema",
+    "text": "{{message}}",
+    "icon": "{{message.tags}}"
+  })
+</script>
+{% endfor %}
+{% endif %}
+
+
+<div class="container">
+  <h3>FORMULARIO DE CIERRE</h3>
+  <form action="#" method="POST" enctype="multipart/form-data">{% csrf_token %}
+  <div class="row">
+
+    <div class="col-md-3">
+      <label>{{form.ventas.label_tag}}</label>
+      {{form.ventas}}
+    </div>
+    <div class="col-md-3">
+      <label>{{form.gastos.label_tag}}</label>
+      {{form.gastos}}
+    </div>
+    <div class="col-md-3">
+      <label>{{form.liquido.label_tag}}</label>
+      {{form.liquido}}
+    </div>
+    <div class="col-md-3">
+      <label>{{form.caja.label_tag}}</label>
+      {{form.caja}}
+    </div>
+    <div class="col-md-3">
+      <label>{{form.deposito.label_tag}}</label>
+      {{form.deposito}}
+    </div>
+    <div class="col-md-3">
+      <label>{{form.boleta.label_tag}}</label>
+      {{form.boleta}}
+    </div>
+
+    <div class="col-md-3">
+      <label>{{form.pollo.label_tag}}</label>
+      {{form.pollo}}
+    </div>
+    <div class="col-md-3">
+      <label>{{form.boleta_pollo.label_tag}}</label>
+      {{form.boleta_pollo}}
+    </div>
+    <div class="col-md-3">
+      <label>{{form.libras.label_tag}}</label>
+      {{form.libras}}
+    </div>
+    
+    <div class="col-md-3">
+      <label>{{form.tienda.label_tag}}</label>
+      {{form.tienda}}
+    </div>
+
+
+  </div><br>
+
+
+  <div class="row">
+
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-success">Guardar</button>
+      <a href="{% url 'Admin' %}" class="btn btn-danger">Cancelar</a>
+    </div>
+
+  </div><br>
+  </form>
+</div>
+
+
+
+<script>
+  let precio1 = document.getElementById("ventas")
+  let precio2 = document.getElementById("gastos")
+  let precio3 = document.getElementById("liquido")
+  
+  precio2.addEventListener("change", () => {
+      precio3.value = (parseFloat(precio1.value) - parseFloat(precio2.value))
+
+  })
+  
+</script>
+
+
+{% endblock %}

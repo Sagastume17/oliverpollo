@@ -1,0 +1,100 @@
+{% extends 'Login/baseregistro.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == "success" %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i>
+              {{message}}
+              <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </div>
+    {% else %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-octagon me-1"></i>
+      {{message}}
+    <button type="button" class="btn btn-danger btn-sm" data-bs-dismiss="alert" aria-label="Close">X</button>
+    </div>
+    {% endif %}  
+    {% endfor %}
+    {% endif %} 
+
+    <div class="card-box mb-30">
+        <form action="" method="POST">{% csrf_token %}
+            <br>
+            <h3 class="text-primary" align="center">REGISTRO DE NUEVO USUARIO</h3>
+            <div class="row" align="center" style="margin: 15px;">
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.username.label_tag}}</label>
+                        {{form.username}}
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.password.label_tag}}</label>
+                        {{form.password}}
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.first_name.label_tag}}</label>
+                        {{form.first_name}}
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.last_name.label_tag}}</label>
+                        {{form.last_name}}
+                    </div>
+                </div>
+            </div>
+            <div class="row" align="center" style="margin: 15px;">
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.email.label_tag}}</label>
+                        {{form.email}}
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.rol.label_tag}}</label>
+                        {{form.rol}}
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.is_staff.label_tag}}</label>
+                        {{form.is_staff}}
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.is_active.label_tag}}</label>
+                        {{form.is_active}}
+                    </div>
+                </div>
+            </div>
+            <div class="row" align="center" style="margin: 15px;">
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>{{form.is_superuser.label_tag}}</label>
+                        {{form.is_superuser}}
+                    </div>
+                </div>
+            </div>
+            <br>
+        <div class="container" align="center">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="reset" class="btn btn-danger">Cancelar</button>
+        </div>
+        <br>
+        </form>
+</div>
+</div>
+
+{% endblock %}

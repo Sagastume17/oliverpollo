@@ -1,0 +1,162 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+<script>
+  Swal.fire({
+    "title": "Informacion Sistema",
+    "text": "Venta Facturada!",
+    "html": "<a href='{{message}}' target='_blank' class='btn btn-danger'>Factura</a>",
+    "icon": "{{message.tags}}"
+  })
+</script>
+{% endfor %}
+{% endif %}
+
+
+<div class="container" style="display: grid; grid-template-columns: repeat(4,1fr); margin-top: 25px;">
+    {% for m in mesa %}
+    <div>
+        <div class="col-md-10">
+            <div class="card">
+              <a href="{% url 'Venta' m.id %}">
+              <img src="{% static 'Base/assets/img/mesa.jpg' %}" class="card-img-top" style="width: 250px;">
+              </a>
+              <div class="card-body">
+                <h6 class="card-title">MESA # {{ m.numero }}</h6>
+                <h6 class="card-title">CAPACIDAD # {{ m.capacidad }}</h6>
+                {% if m.estado == 0 %}
+                <h6 class="card-title">ESTADO: DISPONIBLE</h6>
+                {% elif m.estado == 1 %}
+                <h6 class="card-title">ESTADO: OCUPADA</h6>
+                {% else %}
+                <h6 class="card-title">ESTADO: RESERVADA</h6>
+                {% endif %}
+                <p class="card-text">OBS: {{ m.obs }}</p>
+              </div>
+            </div>
+          </div>
+        
+    </div>
+    {% empty %}
+    <caption>SIN MESAS INGRESADAS</caption>
+    {% endfor %}
+    
+
+</div>
+<hr>
+
+<div class="container">
+
+  <h4>MIS MESAS</h4>
+
+  <div class="table-reposponsive">
+
+    <input class="form-control col-md-3 light-table-filter" data-table="order-table" type="text"
+            placeholder="Buscar.." style="border: 1px solid black;" name="buscar"><br>
+
+    <table class="table table-bordered table-hover table-sm order-table">
+
+      <thead>
+        <tr>
+          <td>Mesa</td>
+          <td>Cliente</td>
+          <td>Total</td>
+          <td>Mesero</td>
+          <td>Estado</td>
+          <td>Actions</td>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for v in v %}
+        <tr>
+          <td>{{v.mesa.numero}}</td>
+          <td>{{v.nombre}}</td>
+          <td>Q.{{v.total}}</td>
+          <td>{{v.usuario}}</td>
+          {% if v.estado == 0 %}
+          <td>Atendiendo</td>
+          {% else %}
+          {% endif %}
+          <td>
+            {% if v.estado == 0 %}
+            <a href="{% url 'Detalle' v.token %}"><i style="color: blue;" class='bx bx-plus-medical'></i></a>
+            {% else %}
+            Terminada
+            {% endif %}
+          </td>
+          <td>
+            {% if v.estado == 1 %}
+            <a href="{{ v.link }}" target="_blank"><i style="color: red; font-size: 30px;" title="Factura/Comprobante" class='bx bxs-file-pdf'></i></a>
+            {% else %}
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <caption>SIN MESAS ATENDIDAS</caption>
+        {% endfor %}
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+<script langauge="javascript">
+  var url = "{% url 'Dash' %}";
+  setTimeout( function() {
+    window.location = url
+    },78000);
+</script>
+
+
+<script type="text/javascript">
+  (function (document) {
+      'use strict';
+
+      var LightTableFilter = (function (Arr) {
+
+          var _input;
+
+          function _onInputEvent(e) {
+              _input = e.target;
+              var tables = document.getElementsByClassName(_input.getAttribute('data-table'));
+              Arr.forEach.call(tables, function (table) {
+                  Arr.forEach.call(table.tBodies, function (tbody) {
+                      Arr.forEach.call(tbody.rows, _filter);
+                  });
+              });
+          }
+
+          function _filter(row) {
+              var text = row.textContent.toLowerCase(), val = _input.value.toLowerCase();
+              row.style.display = text.indexOf(val) === -1 ? 'none' : 'table-row';
+          }
+
+          return {
+              init: function () {
+                  var inputs = document.getElementsByClassName('light-table-filter');
+                  Arr.forEach.call(inputs, function (input) {
+                      input.oninput = _onInputEvent;
+                  });
+              }
+          };
+      })(Array.prototype);
+
+      document.addEventListener('readystatechange', function () {
+          if (document.readyState === 'complete') {
+              LightTableFilter.init();
+          }
+      });
+
+  })(document);
+</script>
+
+{% endblock %}

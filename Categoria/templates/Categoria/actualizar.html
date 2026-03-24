@@ -1,0 +1,68 @@
+{% extends 'Base/base.html' %}
+{% block title %}Modificar Categoria{% endblock %}
+
+{% block content %}
+
+<br></br>
+<div class="container" style="background-color: dark; margin-top: 5px; max-width: 70%;"><br>
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+
+        <div class="row">
+            <!-- Basic Layout -->
+            <div class="col-md-12">
+                <div class="card md-6">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">Actualizar Categoria</h5>
+                        <small class="text-muted float-end">Categoria</small>
+                    </div>
+                    <div class="card-body">
+                        <form action="#" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="basic-default-name">Nombre</label>
+                                <div class="col-sm-10">
+                                    {{form.nombre}}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label">Imagen</label>
+                                <div class="col-sm-10">
+                                    {{form.imagen}}
+                                    {% if form.instance.imagen %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">Imagen actual:</small>
+                                            <img src="{{ form.instance.imagen.url }}" alt="Imagen actual" style="max-width: 100px; max-height: 100px;" class="d-block mt-1">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="basic-default-company">Fecha</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" readonly value="{% now 'd-m-Y' %}" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="basic-default-company">Usuario</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" readonly value="{{user.username}}" />
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-end">
+                                <div class="col-sm-10">
+                                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

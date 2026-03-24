@@ -1,0 +1,113 @@
+{% extends 'Base/base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+
+<div class="container" style="display: grid; grid-template-columns: repeat(3,1fr); grid-column-gap: 25px; margin-top: 25px;">
+
+    <div>
+        <div class="card" style="background-color: rgba(98, 196, 235, 0.596);">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <i style="font-size: 30px;" class='bx bx-clipboard'></i>
+                    </div>
+                    <h3>{{prod}}</h3>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-black">Categorias</span>
+
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card" style="background-color: rgba(98, 196, 235, 0.596);">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <i style="font-size: 30px;" class='bx bx-clipboard'></i>
+                    </div>
+                    <h3>{{prod}}</h3>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-black">Mesas</span>
+
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card" style="background-color: rgba(98, 196, 235, 0.596);">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <i style="font-size: 30px;" class='bx bx-clipboard'></i>
+                    </div>
+                    <h3>{{prod}}</h3>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-black">Platillos</span>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<br>
+
+<div class="container" style="display: grid; grid-template-columns: repeat(3,1fr); grid-column-gap: 25px; margin-top: 25px;">
+
+    <div>
+        <div class="card" style="background-color: rgba(98, 196, 235, 0.596);">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <i style="font-size: 30px;" class='bx bx-clipboard'></i>
+                    </div>
+                    <h3>{{prod}}</h3>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-black">Bebibas</span>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card" style="background-color: rgba(98, 196, 235, 0.596);">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <i style="font-size: 30px;" class='bx bx-clipboard'></i>
+                    </div>
+                    <h3>{{prod}}</h3>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-black">Mesas</span>
+
+            </div>
+        </div>
+    </div>
+
+    <div>
+    <a href="{% url 'venta_tienda:menu_principal' %}" style="text-decoration: none; color: inherit;">
+        <div class="card" style="background-color: rgba(98, 196, 235, 0.596); cursor: pointer;">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <i style="font-size: 30px;" class='bx bx-clipboard'></i>
+                    </div>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-black">Demo venta en tienda</span>
+            </div>
+        </div>
+    </a>
+</div>
+
+
+</div>
+
+
+
+
+
+
+{% endblock %}

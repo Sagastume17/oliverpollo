@@ -1,0 +1,135 @@
+{% extends 'venta_tienda/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Cierre Diario - {{ fecha }}</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{% url 'venta_tienda:menu_principal' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al Menú
+        </a>
+
+        <a href="{% url 'venta_tienda:listar_cierres' %}" class="btn btn-info">
+            <i class="fas fa-list"></i> Ver Todos los Cierres
+        </a>
+
+        <a href="{% url 'venta_tienda:descargar_pdf_cierre' cierre.id %}" class="btn btn-primary">
+            <i class="fas fa-download"></i> Descargar PDF
+        </a>
+    </div>
+
+    <!-- Ticket de cierre -->
+    <h4>Ticket de Cierre</h4>
+    <pre style="font-family: monospace; font-size: 8px;">
+{{ ticket_texto }}
+    </pre>
+
+    <!-- Resumen del día -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Ventas Activas</h5>
+                    <p class="card-text display-6">Q{{ total_ventas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Ventas Anuladas</h5>
+                    <p class="card-text display-6">Q{{ total_ventas_anuladas  }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Dinero Inicial</h5>
+                    <p class="card-text display-6">Q{{ dinero_inicial }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Cierre Diario</h5>
+                    <p class="card-text display-6">Q{{ cierre_diario }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalle de ventas activas -->
+    <h3 class="mb-3">Ventas del Día</h3>
+    {% for venta in ventas %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-header d-flex justify-content-between">
+            <span>Recibo: {{ venta.numero_recibo }}</span>
+            <span>Cliente: {{ venta.cliente_nombre }}</span>
+            <span>Total: Q{{ venta.total }}</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto/Receta</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in venta.detalles.all %}
+                    <tr>
+                        <td>{{ detalle.nombre_item }}</td>
+                        <td>{{ detalle.cantidad }}</td>
+                        <td>Q{{ detalle.precio_unitario }}</td>
+                        <td>Q{{ detalle.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% empty %}
+        <p class="text-center text-muted">No hay ventas registradas para hoy.</p>
+    {% endfor %}
+
+    <!-- Detalle de ventas anuladas -->
+    <h3 class="mt-5 mb-3 text-danger">Ventas Anuladas</h3>
+    {% for venta in ventas_anuladas %}
+    <div class="card mb-3 border-danger shadow-sm">
+        <div class="card-header bg-danger text-white d-flex justify-content-between">
+            <span>Recibo: {{ venta.numero_recibo }}</span>
+            <span>Cliente: {{ venta.cliente_nombre }}</span>
+            <span>Total Anulado: Q{{ venta.total }}</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead class="table-danger">
+                    <tr>
+                        <th>Producto/Receta</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in venta.detalles.all %}
+                    <tr class="table-danger">
+                        <td>{{ detalle.nombre_item }}</td>
+                        <td>{{ detalle.cantidad }}</td>
+                        <td>Q{{ detalle.precio_unitario }}</td>
+                        <td>Q{{ detalle.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% empty %}
+        <p class="text-center text-muted">No hubo ventas anuladas hoy.</p>
+    {% endfor %}
+</div>
+{% endblock %}
