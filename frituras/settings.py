@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-it-7q06tg*(&*mtityq+*x68h6-y+5r$8rx3lh)r%&m&)7#4w^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://www.friturasdeoriente.com','http://www.friturasdeoriente.com','friturasdeoriente.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -90,9 +90,9 @@ WSGI_APPLICATION = 'frituras.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cooporac_frituras',
-        'USER': 'cooporac_friturasuser',
-        'PASSWORD': 'Frito2024',
+        'NAME': 'frituras',
+        'USER': 'root',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'POST': '3306',
         'OPTIONS': {
