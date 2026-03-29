@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container" style="margin-top: 75px;">
-  <h4>PRODUCTOS DADOS DE BAJA</h4><br>
+  <h4>PRODUCTOS DADOS DE BAJA CONTROL INTERNO</h4><br>
   <div class="table-responsive">
     <table class="table table-bordered table-hover">
       <thead>
@@ -23,7 +23,7 @@
             <td>{{ p.stock }}</td>
             <td>{{ p.tienda.nombre }}</td>
             <td>
-              <a href="{% url 'CambiarEstadoProducto' p.id %}" style="color: green;">Activar</a>
+              <a href="{% url 'CambiarEstadoProducto2' p.id %}" style="color: green;">Activar</a>
             </td>
           </tr>
         {% empty %}

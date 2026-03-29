@@ -91,27 +91,44 @@ class Producto2(models.Model):
     def __str__(self):
         return f"{self.nombre} - {self.tienda.nombre}"
     
+from datetime import date, timedelta
+
 class IngresoProducto2(models.Model):
     producto2 = models.ForeignKey(Producto2, on_delete=models.CASCADE)
-    cantidad = models.IntegerField()
+
+    cantidad = models.IntegerField(default=0)  # ➕ ingreso
+    salida = models.IntegerField(default=0)    # ➖ salida
+
     precio_compra = models.DecimalField(max_digits=12, decimal_places=2)
 
-    # Fecha editable (por defecto ayer)
     fecha_ingreso = models.DateField(default=date.today() - timedelta(days=1))
-
-    # Fecha automática del registro
     fecha = models.DateTimeField(auto_now_add=True)
 
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     observacion = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # Actualizar stock del producto
-        self.producto2.stock += self.cantidad
-        self.producto2.precio_compra = self.precio_compra
+
+        # 🔥 VALIDACIÓN
+        if self.cantidad > 0 and self.salida > 0:
+            raise ValueError("No puedes ingresar y sacar al mismo tiempo")
+
+        if self.cantidad == 0 and self.salida == 0:
+            raise ValueError("Debes ingresar una cantidad o una salida")
+
+        # ➕ INGRESO
+        if self.cantidad > 0:
+            self.producto2.stock += self.cantidad
+            self.producto2.precio_compra = self.precio_compra
+
+        # ➖ SALIDA
+        if self.salida > 0:
+            if self.producto2.stock < self.salida:
+                raise ValueError("No hay suficiente stock")
+            self.producto2.stock -= self.salida
+
         self.producto2.save()
         super().save(*args, **kwargs)
-
 
 class Insumos2(models.Model):
     nombre = models.CharField(max_length=250, blank=False, null=False)

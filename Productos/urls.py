@@ -13,6 +13,18 @@ urlpatterns = [
     path('productos-baja/', views.listado_productos_baja, name="ProductosBaja"),
     path('cambiar-estado-producto/<int:producto_id>/', views.cambiar_estado_producto, name="CambiarEstadoProducto"),
     
+
+    # Control Interno de Productos
+    path('nuevo-producto2/', views.nuevo_producto2, name="NuevoProducto2"),
+    path('listado-productos2/', views.listado_productos2, name="ListaProducto2"),
+    path('actualizar-producto2/<int:id>/', views.actualizar_producto2, name="UpdateProducto2"),
+    # path('eliminar-producto2/<int:id>/', views.eliminar_producto2, name="DeleteProducto2"),
+    # path('productos2/tienda/<int:tienda>/', views.productos_por_tienda, name='productos_por_tienda'),
+    path('ingreso-producto2/<int:producto_id>/', views.ingreso_producto2, name="IngresoProducto2"),
+    path('productos-baja2/', views.listado_productos_baja2, name="ProductosBaja2"),
+    path('cambiar-estado-producto2/<int:producto_id>/', views.cambiar_estado_producto2, name="CambiarEstadoProducto2"),
+
+
     #insumos
     path('insumos/', views.listar_insumos, name='listar_insumos'),
     path('insumos/nuevo/', views.crear_insumo, name='crear_insumo'),
