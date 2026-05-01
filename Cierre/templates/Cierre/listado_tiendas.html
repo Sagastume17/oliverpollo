@@ -12,7 +12,7 @@
                 </a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
-                Listado de Tiendas
+                Listado de Tiendas 
             </li>
         </ol>
     </nav>
@@ -28,7 +28,8 @@
             <tr>
                 <th>#</th>
                 <th>Tienda</th>
-                <th>Ver Cierres</th>
+                <th>Ver Historial</th>
+                <th>Cierre Diario</th> <!-- 🔥 NUEVA COLUMNA -->
             </tr>
         </thead>
         <tbody>
@@ -36,15 +37,28 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ tienda.nombre }}</td>
+
+                <!-- Historial -->
                 <td>
                     <a href="{% url 'cierres_tienda' tienda.id %}" class="btn btn-sm btn-primary">
                         <i class="fas fa-eye"></i> Ver Cierres
                     </a>
                 </td>
+
+                <!-- 🔥 IR AL CIERRE DIRECTO -->
+               <td>
+    <a href="{% url 'venta_tienda:crear_control_diario' %}?tienda={{ tienda.id }}"
+   class="btn btn-success btn-sm">
+    Control Diario
+</a>
+</td>
+
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3" class="text-center text-muted">No hay tiendas registradas.</td>
+                <td colspan="4" class="text-center text-muted">
+                    No hay tiendas registradas.
+                </td>
             </tr>
             {% endfor %}
         </tbody>

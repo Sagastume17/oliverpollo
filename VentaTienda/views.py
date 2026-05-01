@@ -963,68 +963,87 @@ def anularfel(request, id):
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.utils import timezone
-from datetime import timedelta
 
-from VentaTienda.models import ControlDiario, UsuarioTienda
+from VentaTienda.models import ControlDiario, UsuarioTienda, Tienda
 from VentaTienda.forms import ControlDiarioForm
 from VentaTienda.views import normalizar_nombre_campo
 
 
 def crear_control_diario(request):
-    """Vista para que empleados de tienda creen el control diario"""
+    """Vista para crear control diario (usuario tienda o admin)"""
 
-    # Verificar sesión
-    if 'usuario_tienda_id' not in request.session:
-        messages.error(request, 'Debe iniciar sesión')
-        return redirect('venta_tienda:login')
-    
-    usuario_tienda = get_object_or_404(UsuarioTienda, id=request.session['usuario_tienda_id'])
-    tienda = usuario_tienda.tienda
     fecha_hoy = timezone.now().date()
 
-    # Verificar si ya existe un control para HOY
-    existe_control = ControlDiario.objects.filter(tienda=tienda, fecha=fecha_hoy).exists()
+    es_admin = request.user.is_authenticated and request.user.is_staff
 
-    # ============================================================
-    # GET → Mostrar formulario
-    # ============================================================
+    usuario_tienda = None
+    tienda = None
+
+    # ============================================
+    # ADMIN → DEBE venir con ?tienda=ID
+    # ============================================
+    if es_admin:
+        tienda_id = request.GET.get('tienda') or request.POST.get('tienda')
+
+        if not tienda_id:
+            messages.warning(request, "Seleccione una tienda.")
+            return redirect('cierre:listado_tiendas')
+
+        tienda = get_object_or_404(Tienda, id=tienda_id)
+
+    # ============================================
+    # USUARIO TIENDA → usa sesión
+    # ============================================
+    else:
+        if 'usuario_tienda_id' not in request.session:
+            messages.error(request, 'Debe iniciar sesión')
+            return redirect('venta_tienda:login')
+
+        usuario_tienda = get_object_or_404(
+            UsuarioTienda,
+            id=request.session['usuario_tienda_id']
+        )
+        tienda = usuario_tienda.tienda
+
+    # ============================================
+    # VALIDAR SI YA EXISTE CONTROL HOY
+    # ============================================
+    existe_control = ControlDiario.objects.filter(
+        tienda=tienda,
+        fecha=fecha_hoy
+    ).exists()
+
+    # ============================================
+    # GET → MOSTRAR FORMULARIO
+    # ============================================
     if request.method == 'GET':
 
         if existe_control:
-            messages.warning(request, 'Ya existe un control diario para el día de hoy.')
+            messages.warning(request, 'Ya existe un control diario para hoy.')
             form = None
-
         else:
             form = ControlDiarioForm()
 
-        # Cargar saldos finales del día anterior para prellenar "Inicio"
-        # Buscar el control más reciente de esta tienda (puede ser ayer u otro día)
+        # ----------------------------------------
+        # CARGAR SALDOS ANTERIORES
+        # ----------------------------------------
         control_anterior = ControlDiario.objects.filter(
             tienda=tienda,
             fecha__lt=fecha_hoy
         ).order_by('-fecha').first()
 
         saldos_iniciales = {}
-        
+
         if control_anterior and control_anterior.productos_saldos:
             saldos_anterior = control_anterior.productos_saldos
-            print(f"[DEBUG] Control anterior encontrado: fecha={control_anterior.fecha}, tienda={tienda.id}")
-            print(f"[DEBUG] Saldos anterior: {saldos_anterior}")
-            
+
             for producto in ControlDiarioForm.PRODUCTOS_SALDOS:
-                # Buscar por nombre exacto del producto
                 datos = saldos_anterior.get(producto, {})
                 valor_final = float(datos.get('final', 0)) if isinstance(datos, dict) else 0
                 saldos_iniciales[producto] = valor_final
-                if valor_final > 0:
-                    print(f"[DEBUG] {producto} -> final={valor_final}")
         else:
-            print(f"[DEBUG] No se encontró control anterior para tienda={tienda.id}, fecha_hoy={fecha_hoy}")
-            # Si no hay control anterior, iniciar en 0
             for producto in ControlDiarioForm.PRODUCTOS_SALDOS:
                 saldos_iniciales[producto] = 0
-        
-        print(f"[DEBUG] saldos_iniciales: {saldos_iniciales}")
 
         context = {
             'form': form,
@@ -1036,6 +1055,7 @@ def crear_control_diario(request):
             'productos_venta': ControlDiarioForm.PRODUCTOS_VENTA,
             'conceptos_fechas': ControlDiarioForm.CONCEPTOS_FECHAS,
             'saldos_iniciales': saldos_iniciales,
+            'es_admin': es_admin,
         }
 
         # Precios por defecto
@@ -1048,9 +1068,9 @@ def crear_control_diario(request):
 
         return render(request, 'venta_tienda/control_diario_form.html', context)
 
-    # ============================================================
-    # POST → Guardar datos del formulario
-    # ============================================================
+    # ============================================
+    # POST → GUARDAR
+    # ============================================
     if request.method == 'POST':
 
         if existe_control:
@@ -1063,14 +1083,11 @@ def crear_control_diario(request):
 
             control = form.save(commit=False)
             control.tienda = tienda
-            control.usuario_tienda = usuario_tienda
+            control.usuario_tienda = usuario_tienda if usuario_tienda else None
             control.fecha = fecha_hoy
 
-            # -----------------------------------
-            # TABLA 1: Productos y Saldos
-            # -----------------------------------
+            # SALDOS
             productos_saldos = {}
-
             for producto in ControlDiarioForm.PRODUCTOS_SALDOS:
                 key = normalizar_nombre_campo(producto)
 
@@ -1088,11 +1105,9 @@ def crear_control_diario(request):
 
             control.productos_saldos = productos_saldos
 
-            # -----------------------------------
-            # TABLA 2: Ventas
-            # -----------------------------------
+            # VENTAS
+            total_venta = 0
             venta_productos = {}
-            total_venta_calculado = 0
 
             for producto in ControlDiarioForm.PRODUCTOS_VENTA:
                 key = normalizar_nombre_campo(producto)
@@ -1107,32 +1122,31 @@ def crear_control_diario(request):
                     'total': total
                 }
 
-                total_venta_calculado += total
+                total_venta += total
 
             control.venta_productos = venta_productos
-            control.total_venta = total_venta_calculado
+            control.total_venta = total_venta
 
-            # -----------------------------------
-            # TABLA 4: Gastos
-            # -----------------------------------
+            # GASTOS
             gastos = []
             idx = 0
+
             while f'gasto_descripcion_{idx}' in request.POST:
                 descripcion = request.POST.get(f'gasto_descripcion_{idx}', '').strip()
+
                 if descripcion:
                     gastos.append({
                         'descripcion': descripcion,
                         'no_factura': request.POST.get(f'gasto_factura_{idx}', ''),
                         'cantidad': float(request.POST.get(f'gasto_cantidad_{idx}', 0) or 0)
                     })
+
                 idx += 1
 
             control.gastos = gastos
             control.gasto_diario = sum(g['cantidad'] for g in gastos)
 
-            # -----------------------------------
-            # TABLA 5: Fechas de control
-            # -----------------------------------
+            # FECHAS
             fechas_control = {}
 
             for concepto in ControlDiarioForm.CONCEPTOS_FECHAS:
@@ -1144,9 +1158,7 @@ def crear_control_diario(request):
 
             control.fechas_control = fechas_control
 
-            # -----------------------------------
-            # TOTAL A DEPOSITAR
-            # -----------------------------------
+            # TOTAL FINAL
             control.total_depositar = control.total_venta - control.gasto_diario
 
             control.save()
